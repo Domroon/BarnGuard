@@ -6,7 +6,7 @@ function App() {
   const [videos, setVideos] = useState("None")
 
   useEffect(() => {
-    fetch("http://172.21.160.1:5000/api/videos")
+    fetch("/api/videos")
       .then((res) => res.json())
       .then((data) => {
         setVideos(data[1].date)

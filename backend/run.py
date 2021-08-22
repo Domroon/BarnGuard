@@ -1,4 +1,5 @@
 from flask import render_template
+from config import flask_app
 
 import config
 
@@ -14,7 +15,7 @@ def home():
     localhost:5000/
     :return:        the rendered template 'home.html'
     """
-    return render_template('home.html')
+    return flask_app.send_static_file('index.html')
 
 def main():
     connex_app.run(host='0.0.0.0', port=5000, debug=True)
