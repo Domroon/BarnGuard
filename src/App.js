@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react"
 import logo from "./logo.svg"
 import "./App.css"
+import { Button, Row, Col, Form, Container } from "react-bootstrap"
+import CardExample from "./CardExample"
+import BootstrapExample from "./BootstrapExample"
 
 function App() {
   const [videos, setVideos] = useState("None")
@@ -25,6 +28,9 @@ function App() {
         <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
           Learn React
         </a>
+        <Button variant="success">Test</Button>
+        <BootstrapExample />
+        <CardExample />
       </header>
     </div>
   )
