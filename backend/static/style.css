@@ -1,0 +1,50 @@
+@import url("https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,400;1,300&display=swap");
+
+/* Background Colors */
+:root {
+  --primary: LightGreen;
+}
+
+/* Global */
+h1 {
+  color: green;
+  font-family: "Merriweather Sans", sans-serif;
+  margin: 20px;
+}
+
+h2 {
+  font-family: "Merriweather Sans", sans-serif;
+}
+
+p {
+  font-size: 1.2rem;
+  font-family: "Merriweather Sans", sans-serif;
+}
+
+.fas {
+  font-size: 5rem;
+}
+
+.container {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.title-center {
+  width: none;
+}
+
+/* Navbar */
+
+.navbar {
+  background-color: var(--primary);
+}
+
+.navbar img {
+  width: 100px;
+}
+
+/* Menu Sidebar */
+.list-group .active {
+  background-color: green;
+}

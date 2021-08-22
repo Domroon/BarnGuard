@@ -1,0 +1,137 @@
+swagger: "2.0"
+info:
+  description: Here is the full API of this website
+  version: "1.0.0"
+  title: Swagger REST Article
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+basePath: "/api"
+
+# Paths supported by the server application
+paths:
+  /videos:
+    get:
+      operationId: "video.read_all"
+      tags:
+        - Videos
+      summary: "The video data structure supported by the server application"
+      description: "Read the whole list of videos"
+      responses:
+        200:
+          description: "Successful read all videos list operation"
+          schema:
+            type: "array"
+            items:
+              properties:
+                date:
+                  type: "string"
+                thumbnail_photo:
+                  type: "string"
+                time:
+                  type: "string"
+                video:
+                  type: "string"
+    
+    post:
+      operationId: video.create
+      tags:
+        - Videos
+      summary: Create a video and add it to the video list
+      description: Create a new video in the video list
+      parameters:
+        - name: video
+          in: body
+          description: Video to create
+          required: True
+          schema:
+            type: object
+            properties:
+              date:
+                type: "string"
+                description: Date the video was recorded
+              thumbnail_photo:
+                type: "string"
+                description: A scaled down preview image
+              time:
+                type: "string"
+                description: Time at which the video was recorded
+              videoname:
+                type: "string"
+                description: Name of the video
+      responses:
+        201:
+          description: Successfully created video in list
+
+  /videos/{videoname}:
+        get:
+          operationId: video.read_one
+          tags:
+            - Videos
+          summary: Read one video from the video list
+          description: Read one video from the video list
+          parameters:
+            - name: videoname
+              in: path
+              description: Videoname of the video to get from the list
+              type: string
+              required: True
+          responses:
+            200:
+              description: Successfully read video from video list operation
+              schema:
+                properties:
+                  date:
+                    type: string
+                  thumbnail_photo:
+                    type: string
+                  time:
+                    type: string
+                  videoname:
+                    type: string
+        
+        put:
+          operationId: video.update
+          tags:
+            - Videos
+          summary: Update a video in the video list
+          description: Update a video in the video list
+          parameters:
+            - name: videoname
+              in: path
+              description: Videoname of the video to update in the list
+              type: string
+              required: True
+            - name: video
+              in: body
+              schema:
+                type: object
+                properties:
+                  date:
+                    type: string
+                  thumbnail_photo:
+                    type: string
+                  time:
+                    type: string
+                  videoname:
+                    type: string
+          responses:
+            200:
+              description: Successfully updated video in people list
+
+        delete:
+          operationId: video.delete
+          tags:
+            - Videos
+          summary: Delete a video from the video list
+          description: Delete a video
+          parameters:
+            - name: videoname
+              in: path
+              type: string
+              required: True
+          responses:
+            200:
+              description: Successfully deleted a video from video list
