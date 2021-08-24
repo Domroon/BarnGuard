@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { BrowserRouter, Switch, Route } from "react-router-dom"
 
 import Videos from "./components/Videos"
@@ -11,6 +11,7 @@ import StateContext from "./StateContext"
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false)
+
   return (
     <>
       <StateContext.Provider value={setLoggedIn}>
