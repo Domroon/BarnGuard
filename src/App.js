@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react"
 
-import Home from "./components/Home"
+import Videos from "./components/Videos"
+import Login from "./components/Login"
+import Register from "./components/Register"
+import ReducedHeader from "./components/ReducedHeader"
+import Footer from "./components/Footer"
 
 function App() {
   const [selectedDate, handleDateChange] = useState(new Date())
@@ -17,7 +21,13 @@ function App() {
       })
   }, [])
 
-  return <Home />
+  return (
+    <>
+      <ReducedHeader />
+      <Login />
+      <Footer />
+    </>
+  )
 }
 
 export default App
