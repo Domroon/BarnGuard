@@ -4,6 +4,7 @@ function Register() {
   return (
     <section class="register-form">
       <div class="container">
+        <h2 className="text-center mt-5">Registrieren</h2>
         <form class="m-5 card p-5">
           <div class="mb-3">
             <label for="name" class="form-label">

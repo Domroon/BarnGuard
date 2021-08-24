@@ -1,10 +1,13 @@
-import React from "react"
+import React, { useContext } from "react"
+import StateContext from "../StateContext"
 
 function Login() {
+  const context = useContext(StateContext)
   return (
-    <section class="login-form">
+    <section class="login">
       <div class="container">
-        <form class="m-5">
+        <h2 className="text-center mt-5">Login</h2>
+        <form class="mx-5">
           <div class="mb-3">
             <label for="exampleInputEmail1" class="form-label">
               Email Adresse
@@ -20,7 +23,7 @@ function Login() {
             </label>
             <input type="password" class="form-control" id="exampleInputPassword1" required></input>
           </div>
-          <button type="submit" class="btn btn-primary">
+          <button onClick={context} type="submit" class="btn btn-primary">
             Senden
           </button>
         </form>

@@ -1,4 +1,5 @@
 import React, { useEffect } from "react"
+import { Link } from "react-router-dom"
 
 function Menu() {
   return (
@@ -22,19 +23,18 @@ function Menu() {
         </div>
         <div class="offcanvas-body">
           <div class="list-group">
-            <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
-              {" "}
-              Home{" "}
-            </a>
-            <a href="#" class="list-group-item list-group-item-action">
-              Register
-            </a>
-            <a href="#" class="list-group-item list-group-item-action">
+            <Link to="/login" class="list-group-item list-group-item-action active" aria-current="true">
               Login
-            </a>
-            <a href="#" class="list-group-item list-group-item-action disabled" tabindex="-1" aria-disabled="true">
-              A disabled link item
-            </a>
+            </Link>
+            <Link to="/registrieren" class="list-group-item list-group-item-action">
+              Registrieren
+            </Link>
+            <Link to="/videos" class="list-group-item list-group-item-action">
+              Videos
+            </Link>
+            <Link to="/profil" class="list-group-item list-group-item-action disabled" tabindex="-1" aria-disabled="true">
+              Profil
+            </Link>
           </div>
         </div>
       </div>

@@ -1,31 +1,35 @@
 import React, { useState, useEffect } from "react"
+import { BrowserRouter, Switch, Route } from "react-router-dom"
 
 import Videos from "./components/Videos"
 import Login from "./components/Login"
 import Register from "./components/Register"
 import ReducedHeader from "./components/ReducedHeader"
+import Header from "./components/Header"
 import Footer from "./components/Footer"
+import StateContext from "./StateContext"
 
 function App() {
-  const [selectedDate, handleDateChange] = useState(new Date())
-  const [videos, setVideos] = useState("None")
-  const [state, setState] = useState({ startDate: null, endDate: null, focusedInput: null })
-  const [endDate, setEndDate] = useState(null)
-  const [focusedInput, setFocusedInput] = useState(null)
-
-  useEffect(() => {
-    fetch("/api/videos")
-      .then((res) => res.json())
-      .then((data) => {
-        setVideos(data[1].date)
-      })
-  }, [])
-
+  const [loggedIn, setLoggedIn] = useState(false)
   return (
     <>
-      <ReducedHeader />
-      <Login />
-      <Footer />
+      <StateContext.Provider value={setLoggedIn}>
+        <BrowserRouter>
+          {loggedIn ? <Header /> : <ReducedHeader />}
+          <Switch>
+            <Route path="/videos">
+              <Videos />
+            </Route>
+            <Route path="/login">
+              <Login />
+            </Route>
+            <Route path="/registrieren">
+              <Register />
+            </Route>
+          </Switch>
+          <Footer />
+        </BrowserRouter>
+      </StateContext.Provider>
     </>
   )
 }
