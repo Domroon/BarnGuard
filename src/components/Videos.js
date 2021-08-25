@@ -1,9 +1,9 @@
 import React, { useState } from "react"
 import "react-dates/initialize"
 import "react-dates/lib/css/_datepicker.css"
-import { DateRangePicker, SingleDatePicker, DayPickerRangeController } from "react-dates"
-import ReactPlayer from "react-player"
+import { DateRangePicker } from "react-dates"
 import SingleVideo from "./SingleVideo"
+import VideoSelection from "./VideoSelection"
 
 function Videos() {
   const [dateRange, setdateRange] = useState({
@@ -27,7 +27,7 @@ function Videos() {
           </div>
           <div className="row m-2">
             <div className="col d-flex justify-content-center">
-              <SingleVideo />
+              <VideoSelection />
             </div>
           </div>
         </div>
