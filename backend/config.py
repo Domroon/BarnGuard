@@ -23,6 +23,7 @@ flask_app.config['SECRET_KEY'] = 'ugasgfiiggfgiiasf657sff'
 flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 flask_app.config['SQLALCHEMY_ECHO'] = True
 flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+flask_app.config['UPLOAD_FOLDER'] = 'video-data'
 db = SQLAlchemy(flask_app)
 
 # Initialize Marshmallow

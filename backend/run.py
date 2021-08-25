@@ -1,5 +1,7 @@
+from flask import send_from_directory
 from flask import render_template
 from config import flask_app
+import os
 
 import config
 
@@ -16,6 +18,11 @@ def home():
     :return:        the rendered template 'home.html'
     """
     return flask_app.send_static_file('index.html')
+
+@connex_app.route('/uploads/<path:filename>', methods=['GET', 'POST'])
+def single_video(filename):
+    uploads = os.path.join(os.getcwd(), flask_app.config['UPLOAD_FOLDER'])
+    return send_from_directory(directory=uploads, filename=filename)
 
 def main():
     connex_app.run(host='0.0.0.0', port=5000, debug=True)
