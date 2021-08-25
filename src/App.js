@@ -8,6 +8,7 @@ import ReducedHeader from "./components/ReducedHeader"
 import Header from "./components/Header"
 import Footer from "./components/Footer"
 import StateContext from "./StateContext"
+import SingleVideo from "./components/SingleVideo"
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false)
@@ -26,6 +27,13 @@ function App() {
             </Route>
             <Route path="/registrieren">
               <Register />
+            </Route>
+            <Route path="/singleVideo">
+              <div className="row m-2">
+                <div className="col d-flex justify-content-center">
+                  <SingleVideo />
+                </div>
+              </div>
             </Route>
           </Switch>
           <Footer />

@@ -2,6 +2,8 @@ import React, { useState } from "react"
 import "react-dates/initialize"
 import "react-dates/lib/css/_datepicker.css"
 import { DateRangePicker, SingleDatePicker, DayPickerRangeController } from "react-dates"
+import ReactPlayer from "react-player"
+import SingleVideo from "./SingleVideo"
 
 function Videos() {
   const [dateRange, setdateRange] = useState({
@@ -21,6 +23,11 @@ function Videos() {
           <div className="row m-2">
             <div className="col">
               <DateRangePicker withPortal autoFocus displayFormat="DD.MM.YYYY" isOutsideRange={() => false} keepOpenOnDateSelect={true} startDatePlaceholderText="Startdatum" startDate={startDate} onDatesChange={handleOnDateChange} endDatePlaceholderText="Enddatum" endDate={endDate} numberOfMonths={1} showClearDates={true} focusedInput={focus} onFocusChange={(focus) => setFocus(focus)} startDateId="startDateMookh" endDateId="endDateMookh" minimumNights={0} />
+            </div>
+          </div>
+          <div className="row m-2">
+            <div className="col d-flex justify-content-center">
+              <SingleVideo />
             </div>
           </div>
         </div>
