@@ -28,7 +28,7 @@ def format_time(time_now):
     return f"{time_items[0]}:{time_items[1]}"
 
 
-def gen_random_time():
+def gen_random_datetime():
     # date
     rand_day = str(randint(0,30))
     if len(rand_day) == 1:
@@ -63,7 +63,7 @@ def main():
     print(time)
     print()
     print("Random Date Time")
-    rand_date, rand_time = gen_random_time()
+    rand_date, rand_time = gen_random_datetime()
     print(rand_date)
     print(rand_time)
     print()
