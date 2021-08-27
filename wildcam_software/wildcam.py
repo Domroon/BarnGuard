@@ -104,6 +104,8 @@ def main():
                 if r.status_code == 200:
                     print(f'{videoname} sucessfully uploaded')
                     print(f'status-code: {r.status_code}')
+                    files.clear()
+                    os.remove(upload_ready / videoname)
                 else:
                     print(f'Can not upload {videoname}')
                     print(f'Response Code: {r.status_code}')
