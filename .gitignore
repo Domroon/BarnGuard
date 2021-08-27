@@ -2,7 +2,7 @@
 
 __pycache__
 
-side.db
+site.db
 
 # dependencies
 /node_modules
