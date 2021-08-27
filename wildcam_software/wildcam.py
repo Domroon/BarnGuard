@@ -11,6 +11,13 @@ import shutil
 import requests
 import json
 
+from requests.models import Response
+
+
+BASE_PATH = Path(getcwd())
+PATH = BASE_PATH / "videos"
+UPLOAD_READY = BASE_PATH / "upload_ready"
+
 
 def generate_formatted_timestamp():
     now = str(DateTime.now()).split(' ')
@@ -71,83 +78,92 @@ def generate_video_json(date, time, raw_video_name):
     return json_data
 
 
-# implement a function that generate a json-object for a post-request to the server (use requests)
+def rename_and_move_video(dir_list, videoname):
+    # rename first video
+    video_path = PATH / dir_list[0]
+    new_video_path = PATH / videoname
+    os.rename(video_path, new_video_path)
+
+    # move video
+    shutil.move(new_video_path, UPLOAD_READY / videoname)
+
+
+def upload_video(videoname):
+    url = "http://localhost:5000/upload"
+    files = {'file' : open(str(UPLOAD_READY/videoname), 'rb')}
+    return requests.post(url, files=files)
+
+    # if r.status_code == 200:
+    #     print(f'{videoname} sucessfully uploaded')
+    #     print(f'Response Code: {r.status_code}')
+    #     files.clear()
+    #     os.remove(UPLOAD_READY / videoname)
+    # else:
+    #     print(f'Can not upload {videoname}')
+    #     print(f'Response Code: {r.status_code}')
+    #     print(f'Response Body:')
+    #     print(f'{r.text}')
+
+
+def upload_video_json(date, time, raw_video_name):
+    url = "http://localhost:5000/api/videos"
+    payload = json.dumps(generate_video_json(date, time, raw_video_name))
+    return requests.post(url, data=payload, headers={'Content-Type': 'application/json'})
+
+    # print(f'Post Json-Data for {raw_video_name}.mp4')
+    # print(f'POST: {payload}')
+    # print(f'Response Code {r.status_code}')
+    # print(f'Response Body:')
+    # print(r.text)
+
+
+def show_response(resp : Response):
+    print(f'[RESPONSE CODE] {resp.status_code}')
+    print(f'[RESPONSE BODY] {resp.text}')
+
+
+# correct the if-query and delete the video at sucessfully upload
+def upload(videoname, raw_video_name):
+    video_response = upload_video(videoname)
+    print("[VIDEO RESPONSE]")
+    show_response(video_response)
+
+    # in production datetime.now() !!!
+    rand_date, rand_time = gen_random_datetime()
+    json_video_response = upload_video_json(rand_date, rand_time, raw_video_name)
+    print("[VIDEO_JSON RESPONSE]")
+    show_response(json_video_response)
+
+    if video_response.status_code != 200 and json_video_response.status_code != 201:
+        return True
+    else:
+        return False
 
 
 def main():
-    BASE_PATH = Path(getcwd())
-    path = BASE_PATH /"videos"
-    upload_ready = BASE_PATH / "upload_ready"
-
     while True:
-        dir_list = listdir(path=path)
+        dir_list = listdir(path=PATH)
+
         if dir_list:
-            print("Video found!")
+            first_videoname = dir_list[0]
+            print(f"[FOUND VIDEO] {first_videoname}")
 
             # generate random name
             raw_video_name = f'{token_urlsafe(8)}'
             videoname = f'{raw_video_name}.mp4'
 
-            # rename first video
-            video_path = path / dir_list[0]
-            new_video_path = path / videoname
-            try:
-                os.rename(video_path, new_video_path)
+            rename_and_move_video(dir_list, videoname)
+            print(f'[RENAME] "{first_videoname}" to "{videoname}"')
 
-                # move video
-                shutil.move(new_video_path, upload_ready / videoname)
-
-                # upload video
-                url = "http://localhost:5000/upload"
-                files = {'file' : open(str(upload_ready/videoname), 'rb')}
-                r = requests.post(url, files=files)
-                if r.status_code == 200:
-                    print(f'{videoname} sucessfully uploaded')
-                    print(f'status-code: {r.status_code}')
-                    files.clear()
-                    os.remove(upload_ready / videoname)
-                else:
-                    print(f'Can not upload {videoname}')
-                    print(f'Response Code: {r.status_code}')
-                    print(f'Response Body:')
-                    print(r.text)
-            except PermissionError:
-                print("PermissionError")
-
-            # delete video after upload
-            # generate json-object and send with POST-request to server
-            rand_date, rand_time = gen_random_datetime()
-
-            url = "http://localhost:5000/api/videos"
-            payload = json.dumps(generate_video_json(rand_date, rand_time, raw_video_name))
-            r = requests.post(url, data=payload, headers={'Content-Type': 'application/json'})
-            print(f'Post Json-Data for {videoname}')
-            print(f'POST: {payload}')
-            print(f'Response Code {r.status_code}')
-            print(f'Response Body:')
-            print(r.text)
+            # try to upload until the internet connection is back
+            while True:
+                success = upload(videoname, raw_video_name)
+                if success:
+                    break
+            print("Exit the Upload Loop")
 
         time.sleep(1)
             
-
-    # print("Date Time now")
-    # date, time = generate_formatted_timestamp()
-    # print(date)
-    # print(time)
-    # print()
-    # print("Random Date Time")
-    # rand_date, rand_time = gen_random_datetime()
-    # print(rand_date)
-    # print(rand_time)
-    # print()
-    # print("videoname")
-    # 
-    # print(videoname + ".mp4")
-    # print()
-    # print("thumbnail_photo")
-    # thumbnail_photo = videoname + ".jpg"
-    # print(thumbnail_photo)
-    
 
 if __name__ == '__main__':
     main()
