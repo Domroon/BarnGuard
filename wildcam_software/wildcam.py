@@ -9,6 +9,7 @@ from pathlib import Path
 import time
 import shutil
 import requests
+import json
 
 
 def generate_formatted_timestamp():
@@ -60,6 +61,16 @@ def gen_random_datetime():
     return rand_date , rand_time
 
 
+def generate_video_json(date, time, raw_video_name):
+    json_data = {
+        "date": date,
+        "thumbnail_photo" : f'{raw_video_name}.jpg',
+        "time" : time,
+        "videoname" : f'{raw_video_name}.mp4',
+    }
+    return json_data
+
+
 # implement a function that generate a json-object for a post-request to the server (use requests)
 
 
@@ -74,7 +85,8 @@ def main():
             print("Video found!")
 
             # generate random name
-            videoname = f'{token_urlsafe(8)}.mp4'
+            raw_video_name = f'{token_urlsafe(8)}'
+            videoname = f'{raw_video_name}.mp4'
 
             # rename first video
             video_path = path / dir_list[0]
@@ -88,15 +100,30 @@ def main():
                 # upload video
                 url = "http://localhost:5000/upload"
                 files = {'file' : open(str(upload_ready/videoname), 'rb')}
-                requests.post(url, files=files)
-                print("Video sucessfully uploaded!")
-
+                r = requests.post(url, files=files)
+                if r.status_code == 200:
+                    print(f'{videoname} sucessfully uploaded')
+                    print(f'status-code: {r.status_code}')
+                else:
+                    print(f'Can not upload {videoname}')
+                    print(f'Response Code: {r.status_code}')
+                    print(f'Response Body:')
+                    print(r.text)
             except PermissionError:
                 print("PermissionError")
 
             # delete video after upload
-            # genrate json-object
-            # send with POST-request to server
+            # generate json-object and send with POST-request to server
+            rand_date, rand_time = gen_random_datetime()
+
+            url = "http://localhost:5000/api/videos"
+            payload = json.dumps(generate_video_json(rand_date, rand_time, raw_video_name))
+            r = requests.post(url, data=payload, headers={'Content-Type': 'application/json'})
+            print(f'Post Json-Data for {videoname}')
+            print(f'POST: {payload}')
+            print(f'Response Code {r.status_code}')
+            print(f'Response Body:')
+            print(r.text)
 
         time.sleep(1)
             
