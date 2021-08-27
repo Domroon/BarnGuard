@@ -1,5 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+__pycache__
+
+site.db
+
 # dependencies
 /node_modules
 /.pnp
@@ -25,3 +29,4 @@ package-lock.json
 
 #datas
 video-data
+upload_ready
