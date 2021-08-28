@@ -67,10 +67,16 @@ def home():
     return flask_app.send_static_file('index.html')
 
 
-@connex_app.route('/uploads/<path:filename>', methods=['GET', 'POST'])
+@connex_app.route('/videos/<path:filename>', methods=['GET', 'POST'])
 def single_video(filename):
-    uploads = os.path.join(os.getcwd(), flask_app.config['UPLOAD_FOLDER'])
-    return send_from_directory(directory=uploads, filename=filename)
+    videos = os.path.join(os.getcwd(), flask_app.config['VIDEO_FOLDER'])
+    return send_from_directory(directory=videos, filename=filename)
+
+
+@connex_app.route('/thumbnail/<path:filename>', methods=['GET', 'POST'])
+def single_thumbnail(filename):
+    thumbnails = os.path.join(os.getcwd(), flask_app.config['THUMBNAIL_FOLDER'])
+    return send_from_directory(directory=thumbnails, filename=filename)
 
 
 @connex_app.route('/upload', methods=['POST'])
@@ -81,7 +87,7 @@ def upload_file():
     file = request.files['file']
     if file and allowed_file(file.filename):
         filename = file.filename
-        file.save(os.path.join(flask_app.config['UPLOAD_FOLDER'], filename))
+        file.save(os.path.join(flask_app.config['VIDEO_FOLDER'], filename))
         manage_thumbnails()
         return "200"
     else:
