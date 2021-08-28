@@ -90,21 +90,19 @@ def rename_and_move_video(dir_list, videoname):
 
 def upload_video(videoname):
     url = "http://localhost:5000/upload"
-    files = {'file' : open(str(UPLOAD_READY/videoname), 'rb')}
-    return requests.post(url, files=files)
+    video_file = open(str(UPLOAD_READY/videoname), 'rb')
+    files = {'file' : video_file}
 
-    # if r.status_code == 200:
-    #     print(f'{videoname} sucessfully uploaded')
-    #     print(f'Response Code: {r.status_code}')
-    #     files.clear()
-    #     os.remove(UPLOAD_READY / videoname)
-    # else:
-    #     print(f'Can not upload {videoname}')
-    #     print(f'Response Code: {r.status_code}')
-    #     print(f'Response Body:')
-    #     print(f'{r.text}')
+    r = requests.post(url, files=files)
 
+    video_file.close()
 
+    if r.status_code == 200:
+        os.remove(UPLOAD_READY / videoname)
+
+    return r
+
+    
 def upload_video_json(date, time, raw_video_name):
     url = "http://localhost:5000/api/videos"
     payload = json.dumps(generate_video_json(date, time, raw_video_name))
@@ -119,7 +117,7 @@ def upload_video_json(date, time, raw_video_name):
 
 def show_response(resp : Response):
     print(f'[RESPONSE CODE] {resp.status_code}')
-    print(f'[RESPONSE BODY] {resp.text}')
+    print(f'[RESPONSE BODY] "{resp.text}"')
 
 
 # correct the if-query and delete the video at sucessfully upload
@@ -152,15 +150,31 @@ def main():
             raw_video_name = f'{token_urlsafe(8)}'
             videoname = f'{raw_video_name}.mp4'
 
-            rename_and_move_video(dir_list, videoname)
-            print(f'[RENAME] "{first_videoname}" to "{videoname}"')
+            # try to rename until the authorization is there
+            while True:
+                try:
+                    rename_and_move_video(dir_list, videoname)
+                    print(f'[RENAME] "{first_videoname}" to "{videoname}"')
+                    break
+                except PermissionError:
+                    print(f'[PERMISSION ERROR] Try again in 1s')
+                    time.sleep(1)
 
             # try to upload until the internet connection is back
             while True:
-                success = upload(videoname, raw_video_name)
-                if success:
+                try:
+                    print(f'[UPLOAD START] "{videoname}" [AT] {DateTime.now()}')
+                    upload(videoname, raw_video_name)
+                    print(f'[UPLOAD END] "{videoname}" [AT] {DateTime.now()}')
                     break
-            print("Exit the Upload Loop")
+                except requests.exceptions.ConnectionError:
+                    print(f'[CONNECTION ERROR] Try again in 5s')
+                    time.sleep(5)
+                except FileNotFoundError:
+                    print(f'[FileNotFoundError] The file has already been uploaded')
+                except PermissionError:
+                    print(f'[PERMISSION ERROR] Try again in 0.5s')
+                    time.sleep(0.5)
 
         time.sleep(1)
             
