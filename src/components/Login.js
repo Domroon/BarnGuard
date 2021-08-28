@@ -2,7 +2,7 @@ import React, { useContext } from "react"
 import StateContext from "../StateContext"
 
 function Login() {
-  const context = useContext(StateContext)
+  const { setLoggedIn } = useContext(StateContext)
   return (
     <section class="login">
       <div class="container">
@@ -23,7 +23,7 @@ function Login() {
             </label>
             <input type="password" class="form-control" id="exampleInputPassword1" required></input>
           </div>
-          <button onClick={context} type="submit" class="btn btn-primary">
+          <button onClick={setLoggedIn} type="submit" class="btn btn-primary">
             Senden
           </button>
         </form>

@@ -12,10 +12,11 @@ import SingleVideo from "./components/SingleVideo"
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false)
+  const [videoname, setVideoname] = useState(null)
 
   return (
     <>
-      <StateContext.Provider value={setLoggedIn}>
+      <StateContext.Provider value={{ setLoggedIn, setVideoname, videoname }}>
         <BrowserRouter>
           {loggedIn ? <Header /> : <ReducedHeader />}
           <Switch>

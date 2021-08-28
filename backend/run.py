@@ -69,7 +69,7 @@ def home():
 
 @connex_app.route('/videos/<path:filename>', methods=['GET', 'POST'])
 def single_video(filename):
-    videos = os.path.join(os.getcwd(), flask_app.config['VIDEO_FOLDER'])
+    videos = os.path.join(os.getcwd(), flask_app.config['VIDEO_FOLDER_PROCESSED'])
     return send_from_directory(directory=videos, filename=filename)
 
 

@@ -24,6 +24,7 @@ flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 flask_app.config['SQLALCHEMY_ECHO'] = True
 flask_app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 flask_app.config['VIDEO_FOLDER'] = 'video-data/new'
+flask_app.config['VIDEO_FOLDER_PROCESSED'] = 'video-data'
 flask_app.config['THUMBNAIL_FOLDER'] = 'thumbnail_pics'
 db = SQLAlchemy(flask_app)
 
