@@ -29,13 +29,7 @@ function App() {
             <Route path="/registrieren">
               <Register />
             </Route>
-            <Route path="/singleVideo">
-              <div className="row m-2">
-                <div className="col d-flex justify-content-center">
-                  <SingleVideo />
-                </div>
-              </div>
-            </Route>
+            <Route path="/singleVideo/:videoname" component={SingleVideo} />
           </Switch>
           <Footer />
         </BrowserRouter>
