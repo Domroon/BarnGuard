@@ -27,7 +27,7 @@ function Videos() {
           </div>
           <div className="row m-2">
             <div className="col d-flex justify-content-center">
-              <VideoSelection />
+              <VideoSelection dateRange={dateRange} />
             </div>
           </div>
         </div>

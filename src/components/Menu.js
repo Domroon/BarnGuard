@@ -1,5 +1,5 @@
 import React, { useEffect } from "react"
-import { Link } from "react-router-dom"
+import { NavLink } from "react-router-dom"
 
 function Menu() {
   return (
@@ -23,18 +23,18 @@ function Menu() {
         </div>
         <div class="offcanvas-body">
           <div class="list-group">
-            <Link to="/login" class="list-group-item list-group-item-action active" aria-current="true">
+            <NavLink to="/login" className="list-group-item list-group-item-action" aria-current="true" activeClassName="active">
               Login
-            </Link>
-            <Link to="/registrieren" class="list-group-item list-group-item-action">
+            </NavLink>
+            <NavLink to="/registrieren" className="list-group-item list-group-item-action" activeClassName="active">
               Registrieren
-            </Link>
-            <Link to="/videos" class="list-group-item list-group-item-action">
+            </NavLink>
+            <NavLink to="/videos" className="list-group-item list-group-item-action" activeClassName="active">
               Videos
-            </Link>
-            <Link to="/profil" class="list-group-item list-group-item-action disabled" tabindex="-1" aria-disabled="true">
+            </NavLink>
+            <NavLink to="/profil" className="list-group-item list-group-item-action disabled" tabindex="-1" aria-disabled="true" activeClassName="active">
               Profil
-            </Link>
+            </NavLink>
           </div>
         </div>
       </div>

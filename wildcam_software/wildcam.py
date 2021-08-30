@@ -1,5 +1,5 @@
 from datetime import datetime as DateTime
-from datetime import timezone
+import datetime
 from random import randint
 import re
 from secrets import token_urlsafe
@@ -45,15 +45,11 @@ def format_time(time_now):
 
 def gen_random_datetime():
     # date
-    rand_day = str(randint(0,30))
-    if len(rand_day) == 1:
-        rand_day = f"0{rand_day}"
-    rand_month = str(randint(1, 12))
-    if len(rand_month) == 1:
-        rand_month = f"0{rand_month}"
-    rand_year = "2021"
+    rand_day = randint(0,30)
+    rand_month = randint(0, 11)
+    rand_year = 2021
 
-    rand_date = f"{rand_day}.{rand_month}.{rand_year}"
+    rand_date = str(datetime.date(rand_year, rand_month, rand_day))
 
     # time
     rand_hour = str(randint(0, 23))

@@ -108,3 +108,23 @@ def delete(videoname):
         abort(
             404, f"Video with videoname {videoname} not found"
         )
+
+
+def search_daterange(date_1, date_2):
+    """
+    This function searches videos in a daterange
+    :param date_1:   from this date
+    :param date_2:   to this date
+    :return:        200 on successful find videos, 404 if not found
+    """
+    videos = Video.query.filter(Video.date >= date_1).\
+        filter(Video.date <= date_2).order_by(Video.date)
+
+    if videos:
+        video_schema = VideoSchema(many=True)
+        return video_schema.dump(videos)  
+    else:
+        # Otherwise, nope, video to delete not found
+        abort(
+            404, f"Videos in the range from {date_1} to {date_2} not found"
+        )

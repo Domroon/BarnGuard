@@ -34,7 +34,7 @@ paths:
                   type: "string"
                 video:
                   type: "string"
-    
+
     post:
       operationId: video.create
       tags:
@@ -66,72 +66,106 @@ paths:
           description: Successfully created video in list
 
   /videos/{videoname}:
-        get:
-          operationId: video.read_one
-          tags:
-            - Videos
-          summary: Read one video from the video list
-          description: Read one video from the video list
-          parameters:
-            - name: videoname
-              in: path
-              description: Videoname of the video to get from the list
-              type: string
-              required: True
-          responses:
-            200:
-              description: Successfully read video from video list operation
-              schema:
-                properties:
-                  date:
-                    type: string
-                  thumbnail_photo:
-                    type: string
-                  time:
-                    type: string
-                  videoname:
-                    type: string
-        
-        put:
-          operationId: video.update
-          tags:
-            - Videos
-          summary: Update a video in the video list
-          description: Update a video in the video list
-          parameters:
-            - name: videoname
-              in: path
-              description: Videoname of the video to update in the list
-              type: string
-              required: True
-            - name: video
-              in: body
-              schema:
-                type: object
-                properties:
-                  date:
-                    type: string
-                  thumbnail_photo:
-                    type: string
-                  time:
-                    type: string
-                  videoname:
-                    type: string
-          responses:
-            200:
-              description: Successfully updated video in people list
+    get:
+      operationId: video.read_one
+      tags:
+        - Videos
+      summary: Read one video from the video list
+      description: Read one video from the video list
+      parameters:
+        - name: videoname
+          in: path
+          description: Videoname of the video to get from the list
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully read video from video list operation
+          schema:
+            properties:
+              date:
+                type: string
+              thumbnail_photo:
+                type: string
+              time:
+                type: string
+              videoname:
+                type: string
 
-        delete:
-          operationId: video.delete
-          tags:
-            - Videos
-          summary: Delete a video from the video list
-          description: Delete a video
-          parameters:
-            - name: videoname
-              in: path
-              type: string
-              required: True
-          responses:
-            200:
-              description: Successfully deleted a video from video list
+    put:
+      operationId: video.update
+      tags:
+        - Videos
+      summary: Update a video in the video list
+      description: Update a video in the video list
+      parameters:
+        - name: videoname
+          in: path
+          description: Videoname of the video to update in the list
+          type: string
+          required: True
+        - name: video
+          in: body
+          schema:
+            type: object
+            properties:
+              date:
+                type: string
+              thumbnail_photo:
+                type: string
+              time:
+                type: string
+              videoname:
+                type: string
+      responses:
+        200:
+          description: Successfully updated video in people list
+
+    delete:
+      operationId: video.delete
+      tags:
+        - Videos
+      summary: Delete a video from the video list
+      description: Delete a video
+      parameters:
+        - name: videoname
+          in: path
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully deleted a video from video list
+
+  /videos/{date_1}to{date_2}:
+    get:
+      operationId: video.search_daterange
+      tags:
+        - Videos
+      summary: Searches videos in a daterange
+      description: Searches videos in a daterange from the video list
+      parameters:
+        - name: date_1
+          in: path
+          description: Search starts at this date
+          type: string
+          required: True
+        - name: date_2
+          in: path
+          description: Search ends at this date
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully find videos in this daterange
+          schema:
+            type: "array"
+            items:
+              properties:
+                date:
+                  type: "string"
+                thumbnail_photo:
+                  type: "string"
+                time:
+                  type: "string"
+                video:
+                  type: "string"
