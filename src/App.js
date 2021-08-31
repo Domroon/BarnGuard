@@ -20,10 +20,10 @@ function App() {
         <BrowserRouter>
           {loggedIn ? <Header /> : <ReducedHeader />}
           <Switch>
-            <Route path="/videos">
+            <Route exact path="/videos">
               <Videos />
             </Route>
-            <Route path="/login">
+            <Route exact path="/">
               <Login />
             </Route>
             <Route path="/registrieren">

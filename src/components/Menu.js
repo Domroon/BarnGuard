@@ -23,7 +23,7 @@ function Menu() {
         </div>
         <div class="offcanvas-body">
           <div class="list-group">
-            <NavLink to="/login" className="list-group-item list-group-item-action" aria-current="true" activeClassName="active">
+            <NavLink exact to="/" className="list-group-item list-group-item-action" aria-current="true" activeClassName="active">
               Login
             </NavLink>
             <NavLink to="/registrieren" className="list-group-item list-group-item-action" activeClassName="active">

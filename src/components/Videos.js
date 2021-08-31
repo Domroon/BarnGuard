@@ -4,6 +4,8 @@ import "react-dates/lib/css/_datepicker.css"
 import { DateRangePicker } from "react-dates"
 import SingleVideo from "./SingleVideo"
 import VideoSelection from "./VideoSelection"
+import moment from "moment"
+import { isSameDay } from "date-fns"
 
 function Videos() {
   const [dateRange, setdateRange] = useState({
