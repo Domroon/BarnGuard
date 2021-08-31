@@ -12,7 +12,7 @@ def get_timestamp():
 # Create a handler for our read (GET) people
 def read_all():
     """
-    This function responds to a request for /api/all_videos
+    This function responds to a request for /api/videos
     with the complete lists of videos
 
     :return:        list of videos

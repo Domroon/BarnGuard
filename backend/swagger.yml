@@ -2,7 +2,7 @@ swagger: "2.0"
 info:
   description: Here is the full API of this website
   version: "1.0.0"
-  title: Swagger REST Article
+  title: Barn Guard REST API
 consumes:
   - "application/json"
 produces:
@@ -169,3 +169,127 @@ paths:
                   type: "string"
                 video:
                   type: "string"
+
+  /user:
+    get:
+      operationId: "user.read_all"
+      tags:
+        - User
+      summary: "The user data structure supported by the server application"
+      description: "Read the whole list of users"
+      responses:
+        200:
+          description: "Successful read all user list operation"
+          schema:
+            type: "array"
+            items:
+              properties:
+                username:
+                  type: "string"
+                email:
+                  type: "string"
+                password:
+                  type: "string"
+                access_token:
+                  type: "string"
+
+    post:
+      operationId: user.create
+      tags:
+        - User
+      summary: Create a user and add it to the user list
+      description: Create a new user in the user list
+      parameters:
+        - name: user
+          in: body
+          description: User to create
+          required: True
+          schema:
+            type: object
+            properties:
+              username:
+                type: "string"
+                description: Name of the User
+              email:
+                type: "string"
+                description: A Email adress e.g. test@web.de
+              password:
+                type: "string"
+                description: A valid password
+              access_token:
+                type: "string"
+                description: To have access to the SPA
+      responses:
+        201:
+          description: Successfully created user in list
+
+  /user/{username}:
+    get:
+      operationId: user.read_one
+      tags:
+        - User
+      summary: Read one user from the user list
+      description: Read one user from the user list
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user to get from the list
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully read user from user list operation
+          schema:
+            properties:
+              username:
+                type: string
+              email:
+                type: string
+              password:
+                type: string
+              access_token:
+                type: string
+
+    put:
+      operationId: user.update
+      tags:
+        - User
+      summary: Update a user in the user list
+      description: Update a user in the user list
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user to update in the list
+          type: string
+          required: True
+        - name: user
+          in: body
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              email:
+                type: string
+              password:
+                type: string
+              access_token:
+                type: string
+      responses:
+        200:
+          description: Successfully updated user in user list
+
+    delete:
+      operationId: user.delete
+      tags:
+        - User
+      summary: Delete a user from the user list
+      description: Delete a user
+      parameters:
+        - name: username
+          in: path
+          type: string
+          required: True
+      responses:
+        200:
+          description: Successfully deleted the user from user list
