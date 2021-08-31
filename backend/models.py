@@ -23,12 +23,11 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), unique=False, nullable=False)
-    access_token = db.Column(db.String(120), unique=True, nullable=False)
 
     def __repr__(self):
-        return f"User('{self.id}', '{self.username}', '{self.email}', '{self.access_token}')"
+        return f"User('{self.id}', '{self.username}', '{self.email}')"
 
 
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ("username", "email", "password", "access_token")
+        fields = ("username", "email", "password")

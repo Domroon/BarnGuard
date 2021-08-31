@@ -190,8 +190,6 @@ paths:
                   type: "string"
                 password:
                   type: "string"
-                access_token:
-                  type: "string"
 
     post:
       operationId: user.create
@@ -216,9 +214,6 @@ paths:
               password:
                 type: "string"
                 description: A valid password
-              access_token:
-                type: "string"
-                description: To have access to the SPA
       responses:
         201:
           description: Successfully created user in list
@@ -247,8 +242,6 @@ paths:
                 type: string
               password:
                 type: string
-              access_token:
-                type: string
 
     put:
       operationId: user.update
@@ -272,8 +265,6 @@ paths:
               email:
                 type: string
               password:
-                type: string
-              access_token:
                 type: string
       responses:
         200:

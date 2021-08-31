@@ -10,9 +10,8 @@ def create(user):
     username = user.get("username")
     email = user.get("email")
     password = user.get("password")
-    access_token = user.get("access_token")
     try:
-        user = User(username=username, email=email, password=password, access_token=access_token)
+        user = User(username=username, email=email, password=password)
         db.session.add(user)
         db.session.commit()
     
@@ -55,7 +54,6 @@ def update(username, user):
         user_to_change.username = user.get("username", None)
         user_to_change.email = user.get("email", None)
         user_to_change.password = user.get("password", None)
-        user_to_change.access_token = user.get("access_token", None)
 
         db.session.commit()
 
