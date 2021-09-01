@@ -10,10 +10,18 @@ produces:
 
 basePath: "/api"
 
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
 # Paths supported by the server application
 paths:
   /videos:
     get:
+      security:
+        - Bearer: []
       operationId: "video.read_all"
       tags:
         - Videos
@@ -36,6 +44,8 @@ paths:
                   type: "string"
 
     post:
+      security:
+        - Bearer: []
       operationId: video.create
       tags:
         - Videos
@@ -67,6 +77,8 @@ paths:
 
   /videos/{videoname}:
     get:
+      security:
+        - Bearer: []
       operationId: video.read_one
       tags:
         - Videos
@@ -93,6 +105,8 @@ paths:
                 type: string
 
     put:
+      security:
+        - Bearer: []
       operationId: video.update
       tags:
         - Videos
@@ -122,6 +136,8 @@ paths:
           description: Successfully updated video in people list
 
     delete:
+      security:
+        - Bearer: []
       operationId: video.delete
       tags:
         - Videos
@@ -138,6 +154,8 @@ paths:
 
   /videos/{date_1}to{date_2}:
     get:
+      security:
+        - Bearer: []
       operationId: video.search_daterange
       tags:
         - Videos
@@ -172,6 +190,8 @@ paths:
 
   /user:
     get:
+      security:
+        - Bearer: []
       operationId: "user.read_all"
       tags:
         - User
@@ -192,6 +212,8 @@ paths:
                   type: "string"
 
     post:
+      security:
+        - Bearer: []
       operationId: user.create
       tags:
         - User
@@ -220,6 +242,8 @@ paths:
 
   /user/{username}:
     get:
+      security:
+        - Bearer: []
       operationId: user.read_one
       tags:
         - User
@@ -244,6 +268,8 @@ paths:
                 type: string
 
     put:
+      security:
+        - Bearer: []
       operationId: user.update
       tags:
         - User
@@ -271,6 +297,8 @@ paths:
           description: Successfully updated user in user list
 
     delete:
+      security:
+        - Bearer: []
       operationId: user.delete
       tags:
         - User
@@ -284,3 +312,31 @@ paths:
       responses:
         200:
           description: Successfully deleted the user from user list
+
+  # /auth/{username}/{password}:
+  #   get:
+  #     operationId: run.generate_token
+  #     tags:
+  #       - Token
+  #     summary: Create a token and send it to the user
+  #     description: Create a new user in the user list
+  #     parameters:
+  #       - name: username
+  #         in: path
+  #         description: The User who should get an access token
+  #         type: string
+  #         required: True
+  #       - name: password
+  #         in: path
+  #         description: Passwort from the User
+  #         type: string
+  #         required: True
+  #     responses:
+  #       201:
+  #         description: Successfully created a token
+  #         schema:
+  #           type: "string"
+  #           items:
+  #             properties:
+  #               token:
+  #                 type: "string"

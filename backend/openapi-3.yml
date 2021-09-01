@@ -1,0 +1,150 @@
+openapi: 3.0.0
+info:
+  title: JWT Example
+  version: "1.0"
+
+servers:
+  - url: /api
+
+paths:
+  /videos:
+    get:
+      summary: The video data structure supported by the server application
+      operationId: video.read_all
+      tags:
+        - Videos
+      responses:
+        "200":
+          description: Successfull read all videos
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  properties:
+                    date:
+                      type: string
+                    thumbnail_photo:
+                      type: string
+                    time:
+                      type: string
+                    video:
+                      type: string
+
+    post:
+      summary: Create a video and add it to the video list
+      operationId: video.create
+      tags:
+        - Videos
+      parameters:
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/thumbnail_photo"
+        - $ref: "#/components/parameters/time"
+        - $ref: "#/components/parameters/videoname"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              x-body-name: video
+              $ref: "#/components/schemas/Video"
+
+      responses:
+        201:
+          description: Sucessfully created video
+
+  /secret:
+    get:
+      summary: Return secret string
+      operationId: video.delete
+      responses:
+        "200":
+          description: secret response
+          content:
+            "text/plain":
+              schema:
+                type: string
+      security:
+        - jwt: ["secret"]
+
+  /auth/{user_id}:
+    get:
+      summary: Return JWT token
+      operationId: video.update
+      parameters:
+        - name: user_id
+          description: User unique identifier
+          in: path
+          required: true
+          example: 12
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: JWT token
+          content:
+            "text/plain":
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: video.search_daterange
+
+  parameters:
+    date:
+      name: date
+      description: Date the video was recorded
+      in: path
+      required: true
+      schema:
+        type: string
+    thumbnail_photo:
+      name: thumbnail_photo
+      description: Filename of a scaled down preview image
+      in: path
+      required: true
+      schema:
+        type: string
+    time:
+      name: time
+      description: Time the video was recorded
+      in: path
+      required: true
+      schema:
+        type: string
+    videoname:
+      name: videoname
+      description: Video's Unique Name
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    Video:
+      type: object
+      required:
+        - date
+        - thumbnail_photo
+        - time
+        - videoname
+      properties:
+        date:
+          type: string
+          description: Date the video was recorded
+          example: "2021-09-01"
+        thumbnail_photo:
+          type: string
+          description: Filename of a scaled down preview image
+          example: example.jpg
+        time:
+          type: string
+          description: Time the video was recorded
+          example: "12:00"
+        videoname:
+          type: string
+          description: Filename of the video
+          example: "example.mp4"

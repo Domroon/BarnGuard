@@ -9,6 +9,11 @@ from PIL import Image
 import time
 import shutil
 
+import connexion
+import six
+from werkzeug.exceptions import Unauthorized
+from jose import JWTError, jwt
+
 BASE_PATH = Path(os.getcwd()) 
 TARGETS = {
     "video": BASE_PATH / "video-data" / "new",
@@ -17,6 +22,13 @@ TARGETS = {
 }
 
 ALLOWED_EXTENSIONS = {'mp4'}
+
+
+JWT_ISSUER = 'com.zalando.connexion'
+JWT_SECRET = 'change_this'
+JWT_LIFETIME_SECONDS = 600
+JWT_ALGORITHM = 'HS256'
+
 
 connex_app = config.connexion_app
 
@@ -92,6 +104,22 @@ def upload_file():
         return "200"
     else:
         return "415"
+
+
+def generate_token(user_id):
+    timestamp = _current_timestamp()
+    payload = {
+        "iss": JWT_ISSUER,
+        "iat": int(timestamp),
+        "exp": int(timestamp + JWT_LIFETIME_SECONDS),
+        "sub": str(user_id),
+    }
+
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def _current_timestamp() -> int:
+    return int(time.time())
 
 
 def main():
