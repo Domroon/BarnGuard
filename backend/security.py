@@ -84,30 +84,20 @@ def _current_timestamp() -> int:
     return int(time.time())
 
 
-def check_password(username, password):
-    if username == "domroon" and password=="geheim":
-        return True
-    else:
-        return False
-
-
-def generate_token(username, password):
+def generate_token(username):
     # get username from database and check the password (encrypted by bcrypt)
     # for testing:
-    if check_password(username, password):
-        timestamp = _current_timestamp()
-        payload = {
-                "iss": JWT_ISSUER,
-                "iat": int(timestamp),
-                "exp": int(timestamp + JWT_LIFETIME_SECONDS),
-                "sub": str(username),
-        }
+    timestamp = _current_timestamp()
+    payload = {
+            "iss": JWT_ISSUER,
+            "iat": int(timestamp),
+            "exp": int(timestamp + JWT_LIFETIME_SECONDS),
+            "sub": str(username),
+    }
 
-        bytes_payload = json.dumps(payload).encode('utf-8')
+    bytes_payload = json.dumps(payload).encode('utf-8')
 
-        return KEY_OBJ.encrypt(bytes_payload)
-    else:
-        return "Unauthorized"
+    return KEY_OBJ.encrypt(bytes_payload)
 
 
 def decode_token(token):
