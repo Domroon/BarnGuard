@@ -45,7 +45,7 @@ def format_time(time_now):
 
 def gen_random_datetime():
     # date
-    rand_day = randint(0,30)
+    rand_day = randint(1,30)
     rand_month = randint(0, 11)
     rand_year = 2021
 
