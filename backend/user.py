@@ -1,7 +1,11 @@
+from security import decode_token
 from flask import abort, make_response
 from sqlalchemy import exc
 from models import User, UserSchema
 from config import db
+from config import bcrypt
+import security
+import json
 
 def create(user):
     """
@@ -10,8 +14,9 @@ def create(user):
     username = user.get("username")
     email = user.get("email")
     password = user.get("password")
+    pw_hash = bcrypt.generate_password_hash(password)
     try:
-        user = User(username=username, email=email, password=password)
+        user = User(username=username, email=email, password=pw_hash)
         db.session.add(user)
         db.session.commit()
     
@@ -74,3 +79,19 @@ def delete(username):
         abort(
             404, f'User with username {username} not found'
         )
+
+def login(username, password):
+    user = User.query.filter_by(username=username).first()
+
+    decoded_password = user.password.decode('utf-8')
+    is_correct = bcrypt.check_password_hash(decoded_password, password)
+
+
+    if is_correct:
+        return make_response(f'The password is {password}')
+    else:
+        abort(
+            404, f'Password not correct!'
+        )
+    # response access_token if password is correct!!
+    #security.generate_token(user.username, dec_password,)

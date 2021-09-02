@@ -313,30 +313,30 @@ paths:
         200:
           description: Successfully deleted the user from user list
 
-  # /auth/{username}/{password}:
-  #   get:
-  #     operationId: run.generate_token
-  #     tags:
-  #       - Token
-  #     summary: Create a token and send it to the user
-  #     description: Create a new user in the user list
-  #     parameters:
-  #       - name: username
-  #         in: path
-  #         description: The User who should get an access token
-  #         type: string
-  #         required: True
-  #       - name: password
-  #         in: path
-  #         description: Passwort from the User
-  #         type: string
-  #         required: True
-  #     responses:
-  #       201:
-  #         description: Successfully created a token
-  #         schema:
-  #           type: "string"
-  #           items:
-  #             properties:
-  #               token:
-  #                 type: "string"
+  /auth/{username}/{password}:
+    get:
+      operationId: user.login
+      tags:
+        - Auth
+      summary: Create a token and send it to the user
+      description: Create a new user in the user list
+      parameters:
+        - name: username
+          in: path
+          description: The User who should get an access token
+          type: string
+          required: True
+        - name: password
+          in: path
+          description: Passwort from the User
+          type: string
+          required: True
+      responses:
+        201:
+          description: Successfully created a token
+          schema:
+            type: "string"
+            items:
+              properties:
+                token:
+                  type: "string"

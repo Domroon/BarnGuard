@@ -11,6 +11,7 @@ JWT_LIFETIME_SECONDS = 30
 
 #key = Fernet.generate_key()
 KEY = b'canqPbW5nzW4t5QneAEVqVELvXdEX2CTmPsd8kaacWc='
+KEY_OBJ = Fernet(KEY)
 
 def tests():
     f = Fernet(KEY)
@@ -90,7 +91,7 @@ def check_password(username, password):
         return False
 
 
-def generate_token(username, password, key_obj):
+def generate_token(username, password):
     # get username from database and check the password (encrypted by bcrypt)
     # for testing:
     if check_password(username, password):
@@ -104,15 +105,15 @@ def generate_token(username, password, key_obj):
 
         bytes_payload = json.dumps(payload).encode('utf-8')
 
-        return key_obj.encrypt(bytes_payload)
+        return KEY_OBJ.encrypt(bytes_payload)
     else:
         return "Unauthorized"
 
 
-def decode_token(token, key_obj):
+def decode_token(token):
     encoded_token = token.encode('utf-8')
     try:
-        token_dec = key_obj.decrypt(encoded_token)
+        token_dec = KEY_OBJ.decrypt(encoded_token)
     except cryptography.fernet.InvalidToken:
         return 'Unauthorized'
 
@@ -125,19 +126,18 @@ def decode_token(token, key_obj):
         return token_dict
 
 
-def main():
-    key_obj = Fernet(KEY)
-    choice = input("1 - Generate Token       2 - Decode Token")
+# def main():
+#     choice = input("1 - Generate Token       2 - Decode Token")
 
-    if choice == "1":
-        print(generate_token("domroon", "geheim", key_obj))
-    elif choice == "2":
-        token = input("Token: ")
-        print(decode_token(token, key_obj))
-    else:
-        print("Invalid choice")
+#     if choice == "1":
+#         print(generate_token("domroon", "geheim", key_obj))
+#     elif choice == "2":
+#         token = input("Token: ")
+#         print(decode_token(token, key_obj))
+#     else:
+#         print("Invalid choice")
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
 
