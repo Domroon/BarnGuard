@@ -86,14 +86,11 @@ def login(username, password):
     decoded_password = user.password.decode('utf-8')
     is_correct = bcrypt.check_password_hash(decoded_password, password)
 
-    token_str = security.generate_token(username).decode('utf-8')
-
-    access_token = json.dumps({ "access_token" : token_str})
-
     if is_correct:
+        token_str = security.generate_token(username).decode('utf-8')
+        access_token = json.dumps({ "access_token" : token_str})
         return make_response(access_token)
     else:
         abort(
             404, f'Password not correct!'
         )
-    #security.generate_token(user.username, dec_password,)
