@@ -20,8 +20,8 @@ securityDefinitions:
 paths:
   /videos:
     get:
-      security:
-        - Bearer: []
+      # security:
+      #   - Bearer: []
       operationId: "video.read_all"
       tags:
         - Videos
@@ -44,8 +44,8 @@ paths:
                   type: "string"
 
     post:
-      security:
-        - Bearer: []
+      # security:
+      #   - Bearer: []
       operationId: video.create
       tags:
         - Videos
@@ -77,8 +77,8 @@ paths:
 
   /videos/{videoname}:
     get:
-      security:
-        - Bearer: []
+      # security:
+      #   - Bearer: []
       operationId: video.read_one
       tags:
         - Videos
@@ -105,8 +105,8 @@ paths:
                 type: string
 
     put:
-      security:
-        - Bearer: []
+      # security:
+      #   - Bearer: []
       operationId: video.update
       tags:
         - Videos
@@ -136,8 +136,8 @@ paths:
           description: Successfully updated video in people list
 
     delete:
-      security:
-        - Bearer: []
+      # security:
+      #   - Bearer: []
       operationId: video.delete
       tags:
         - Videos
@@ -154,8 +154,8 @@ paths:
 
   /videos/{date_1}to{date_2}:
     get:
-      security:
-        - Bearer: []
+      # security:
+      #   - Bearer: []
       operationId: video.search_daterange
       tags:
         - Videos
@@ -190,8 +190,8 @@ paths:
 
   /user:
     get:
-      security:
-        - Bearer: []
+      # security:
+      #   - Bearer: []
       operationId: "user.read_all"
       tags:
         - User
@@ -212,8 +212,8 @@ paths:
                   type: "string"
 
     post:
-      security:
-        - Bearer: []
+      # security:
+      #   - Bearer: []
       operationId: user.create
       tags:
         - User
@@ -242,8 +242,8 @@ paths:
 
   /user/{username}:
     get:
-      security:
-        - Bearer: []
+      # security:
+      #   - Bearer: []
       operationId: user.read_one
       tags:
         - User
@@ -268,8 +268,8 @@ paths:
                 type: string
 
     put:
-      security:
-        - Bearer: []
+      # security:
+      #   - Bearer: []
       operationId: user.update
       tags:
         - User
@@ -297,8 +297,8 @@ paths:
           description: Successfully updated user in user list
 
     delete:
-      security:
-        - Bearer: []
+      # security:
+      #   - Bearer: []
       operationId: user.delete
       tags:
         - User
