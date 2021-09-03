@@ -15,13 +15,14 @@ securityDefinitions:
     type: apiKey
     name: Authorization
     in: header
+    x-apikeyInfoFunc: security.check_token
 
 # Paths supported by the server application
 paths:
   /videos:
     get:
-      # security:
-      #   - Bearer: []
+      security:
+        - Bearer: []
       operationId: "video.read_all"
       tags:
         - Videos
@@ -44,8 +45,8 @@ paths:
                   type: "string"
 
     post:
-      # security:
-      #   - Bearer: []
+      security:
+        - Bearer: []
       operationId: video.create
       tags:
         - Videos
@@ -77,8 +78,8 @@ paths:
 
   /videos/{videoname}:
     get:
-      # security:
-      #   - Bearer: []
+      security:
+        - Bearer: []
       operationId: video.read_one
       tags:
         - Videos
@@ -105,8 +106,8 @@ paths:
                 type: string
 
     put:
-      # security:
-      #   - Bearer: []
+      security:
+        - Bearer: []
       operationId: video.update
       tags:
         - Videos
@@ -136,8 +137,8 @@ paths:
           description: Successfully updated video in people list
 
     delete:
-      # security:
-      #   - Bearer: []
+      security:
+        - Bearer: []
       operationId: video.delete
       tags:
         - Videos
@@ -154,8 +155,8 @@ paths:
 
   /videos/{date_1}to{date_2}:
     get:
-      # security:
-      #   - Bearer: []
+      security:
+        - Bearer: []
       operationId: video.search_daterange
       tags:
         - Videos
@@ -190,8 +191,8 @@ paths:
 
   /user:
     get:
-      # security:
-      #   - Bearer: []
+      security:
+        - Bearer: []
       operationId: "user.read_all"
       tags:
         - User
@@ -242,8 +243,8 @@ paths:
 
   /user/{username}:
     get:
-      # security:
-      #   - Bearer: []
+      security:
+        - Bearer: []
       operationId: user.read_one
       tags:
         - User
@@ -268,8 +269,8 @@ paths:
                 type: string
 
     put:
-      # security:
-      #   - Bearer: []
+      security:
+        - Bearer: []
       operationId: user.update
       tags:
         - User
@@ -297,8 +298,8 @@ paths:
           description: Successfully updated user in user list
 
     delete:
-      # security:
-      #   - Bearer: []
+      security:
+        - Bearer: []
       operationId: user.delete
       tags:
         - User
@@ -313,7 +314,7 @@ paths:
         200:
           description: Successfully deleted the user from user list
 
-  /auth/{username}/{password}:
+  /auth/login/{username}/{password}:
     get:
       operationId: user.login
       tags:
@@ -334,6 +335,37 @@ paths:
       responses:
         201:
           description: Successfully created a token
+          schema:
+            type: "string"
+            items:
+              properties:
+                token:
+                  type: "string"
+
+  /auth/check/{token}:
+    get:
+      operationId: security.check_token
+      tags:
+        - Auth
+      summary: Check if the token is valid
+      description: Check if the token is valid
+      parameters:
+        - name: token
+          in: path
+          description: The token that should check
+          type: string
+          required: True
+      responses:
+        200:
+          description: Valid Token
+          schema:
+            type: "string"
+            items:
+              properties:
+                token:
+                  type: "string"
+        401:
+          description: Invalid Token OR Expired Token
           schema:
             type: "string"
             items:

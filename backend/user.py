@@ -1,4 +1,3 @@
-from security import decode_token
 from flask import abort, make_response
 from sqlalchemy import exc
 from models import User, UserSchema
@@ -22,7 +21,7 @@ def create(user):
     
     except exc.IntegrityError:
         abort(
-                400, f'Video with username "{username}" or the email "{email}" already exsists'
+                400, f'User with username "{username}" or the email "{email}" already exsists'
             ) 
     
     return make_response(f'"{username}" sucessfully created', 201)

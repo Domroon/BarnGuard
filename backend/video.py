@@ -3,7 +3,7 @@ from flask import make_response, abort
 from models import Video, VideoSchema
 from config import db
 from sqlalchemy import exc
-
+import security
 
 def get_timestamp():
     return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
@@ -52,17 +52,16 @@ def create(video):
     thumbnail_photo = video.get("thumbnail_photo", None)
     time = video.get("time", None)
     videoname = video.get("videoname", None)
-
     try:
         video = Video(date=date, thumbnail_photo=thumbnail_photo, time=time, videoname=videoname)
         db.session.add(video)
         db.session.commit()
     except exc.IntegrityError:
         abort(
-                400, f"Video with videoname {videoname} or with the thumbnail_photo {thumbnail_photo} already exsists"
+                400, f'Video with videoname {videoname} or with the thumbnail_photo {thumbnail_photo} already exsists'
             ) 
 
-    return make_response(f"{videoname} successfully created", 201)
+    return make_response(f'"{videoname}"" successfully created', 201)
 
     
 def update(videoname, video):

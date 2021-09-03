@@ -4,10 +4,11 @@ import cryptography
 import json
 import ast
 import time
+from flask import make_response, abort
 
 JWT_ISSUER = 'domroon.de'
 JWT_SECRET = b'canqPbW5nzW4t5QneAEVqVELvXdEX2CTmPsd8kaacWc='
-JWT_LIFETIME_SECONDS = 30
+JWT_LIFETIME_SECONDS = 3600 # in production: 900s (15 min)
 
 #key = Fernet.generate_key()
 KEY = b'canqPbW5nzW4t5QneAEVqVELvXdEX2CTmPsd8kaacWc='
@@ -100,19 +101,24 @@ def generate_token(username):
     return KEY_OBJ.encrypt(bytes_payload)
 
 
-def decode_token(token):
+def check_token(token):
     encoded_token = token.encode('utf-8')
     try:
         token_dec = KEY_OBJ.decrypt(encoded_token)
     except cryptography.fernet.InvalidToken:
-        return 'Unauthorized'
+        abort(
+            401, f'Invalid Token'
+        )
 
     token_str = token_dec.decode('utf-8')
     token_dict = ast.literal_eval(token_str)
 
     if int(_current_timestamp()) >= token_dict["exp"]:
-        return 'Token expired'
+        abort(
+            401, f'Expired Token'
+        )
     else:
+        # return make_response(f'Valid Token', 200)
         return token_dict
 
 
