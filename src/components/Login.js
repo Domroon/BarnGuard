@@ -1,30 +1,50 @@
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import StateContext from "../StateContext"
+import axios from "axios"
 
 function Login() {
   const { setLoggedIn } = useContext(StateContext)
+  const [username, setUsername] = useState()
+  const [password, setPassword] = useState()
+  const { access_token, setAccessToken } = useContext(StateContext)
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    try {
+      const response = await axios.get(`http://localhost:5000/api/auth/login/${username}/${password}`)
+      console.log("User sucessfully logged in.")
+      localStorage.setItem("access_token", response.data.access_token)
+      setAccessToken(localStorage.getItem("access_token"))
+      //console.log(access_token)
+      // redirect to videos site!
+      setLoggedIn(true)
+    } catch (e) {
+      console.log("There was an error.")
+    }
+  }
+
   return (
     <section class="login">
       <div class="container">
         <h2 className="text-center mt-5">Login</h2>
-        <form class="mx-5">
-          <div class="mb-3">
-            <label for="exampleInputEmail1" class="form-label">
-              Email Adresse
+        <form onSubmit={handleSubmit} class="mx-5">
+          <div className="mb-3">
+            <label for="name" className="form-label">
+              Nickname
             </label>
-            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" required></input>
-            <div id="emailHelp" class="form-text">
-              Wir teilen Deine E-Mail Adresse mit niemandem.
+            <input onChange={(e) => setUsername(e.target.value)} type="text" className="form-control" id="name" aria-describedby="emailHelp" required></input>
+            <div id="emailHelp" className="form-text">
+              Bitte gebe Deinen Nicknamen ein
             </div>
           </div>
           <div class="mb-3">
             <label for="exampleInputPassword1" class="form-label">
               Passwort
             </label>
-            <input type="password" class="form-control" id="exampleInputPassword1" required></input>
+            <input onChange={(e) => setPassword(e.target.value)} type="password" class="form-control" id="exampleInputPassword1" required></input>
           </div>
-          <button onClick={setLoggedIn} type="submit" class="btn btn-primary">
-            Senden
+          <button type="submit" class="btn btn-primary">
+            Sende
           </button>
         </form>
       </div>

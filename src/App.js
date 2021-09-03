@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { BrowserRouter, Switch, Route } from "react-router-dom"
+import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom"
 
 import Videos from "./components/Videos"
 import Login from "./components/Login"
@@ -13,10 +13,11 @@ import SingleVideo from "./components/SingleVideo"
 function App() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [videoname, setVideoname] = useState(null)
+  const [access_token, setAccessToken] = useState(localStorage.getItem("access_token"))
 
   return (
     <>
-      <StateContext.Provider value={{ setLoggedIn, setVideoname, videoname }}>
+      <StateContext.Provider value={{ setLoggedIn, setVideoname, videoname, access_token, setAccessToken }}>
         <BrowserRouter>
           {loggedIn ? <Header /> : <ReducedHeader />}
           <Switch>
@@ -24,7 +25,7 @@ function App() {
               <Videos />
             </Route>
             <Route exact path="/">
-              <Login />
+              {loggedIn ? <Redirect to="/videos" /> : <Login />}
             </Route>
             <Route path="/registrieren">
               <Register />

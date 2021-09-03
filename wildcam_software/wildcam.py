@@ -45,8 +45,8 @@ def format_time(time_now):
 
 def gen_random_datetime():
     # date
-    rand_day = randint(1,30)
-    rand_month = randint(0, 11)
+    rand_day = randint(1,29)
+    rand_month = randint(1, 12)
     rand_year = 2021
 
     rand_date = str(datetime.date(rand_year, rand_month, rand_day))
@@ -89,7 +89,7 @@ def upload_video(videoname):
     video_file = open(str(UPLOAD_READY/videoname), 'rb')
     files = {'file' : video_file}
 
-    r = requests.post(url, files=files)
+    r = requests.post(url, files=files, headers={'Authorization' : 'gAAAAABhMhDkkS0ZWFKyrhFBnDxJp5r_cjV-ZXFYh4adcoCMRSwo_qcnfsqadt4nwD3XXBlYXNHNBJWyEB7FeH6qR_FVnxFa-NGLI2HPGBYCnY2avAdd5UJ1fBOR5YoVVR5O7iXE9rpnZKRWdkUAsyQ5zuQA_XquSukJvwziExE6a5TW4NTw3xQ='})
 
     video_file.close()
 
@@ -102,7 +102,7 @@ def upload_video(videoname):
 def upload_video_json(date, time, raw_video_name):
     url = "http://localhost:5000/api/videos"
     payload = json.dumps(generate_video_json(date, time, raw_video_name))
-    return requests.post(url, data=payload, headers={'Content-Type': 'application/json'})
+    return requests.post(url, data=payload, headers={'Content-Type': 'application/json', 'Authorization' : 'gAAAAABhMhDkkS0ZWFKyrhFBnDxJp5r_cjV-ZXFYh4adcoCMRSwo_qcnfsqadt4nwD3XXBlYXNHNBJWyEB7FeH6qR_FVnxFa-NGLI2HPGBYCnY2avAdd5UJ1fBOR5YoVVR5O7iXE9rpnZKRWdkUAsyQ5zuQA_XquSukJvwziExE6a5TW4NTw3xQ='})
 
     # print(f'Post Json-Data for {raw_video_name}.mp4')
     # print(f'POST: {payload}')

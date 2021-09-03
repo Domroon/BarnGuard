@@ -14,12 +14,19 @@ function VideoSelection(dateRange) {
   const [items, setItems] = useState([])
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
+  const { access_token } = useContext(StateContext)
 
   function make_standard_fetch() {
     setIsLoaded(false)
     setError(false)
-    fetch(`http://localhost:5000/api/videos`) //${dateRange.dateRange.startDate}to${dateRange.dateRange.startDate}`)
-      .then((res) => res.json())
+    const response = fetch(`http://localhost:5000/api/videos`, { headers: { Authorization: access_token } }) //${dateRange.dateRange.startDate}to${dateRange.dateRange.startDate}`)
+      .then((res) => {
+        if (!res.ok) {
+          console.log(access_token)
+          throw new Error(`Network response was not ok`)
+        }
+        return res.json()
+      })
       .then(
         (result) => {
           setIsLoaded(true)
@@ -38,8 +45,14 @@ function VideoSelection(dateRange) {
   function daterange_fetch() {
     setIsLoaded(false)
     setError(false)
-    fetch(`http://localhost:5000/api/videos/${dateRange.dateRange.startDate.format("YYYY-MM-DD")}to${dateRange.dateRange.endDate.format("YYYY-MM-DD")}`)
-      .then((res) => res.json())
+    fetch(`http://localhost:5000/api/videos/${dateRange.dateRange.startDate.format("YYYY-MM-DD")}to${dateRange.dateRange.endDate.format("YYYY-MM-DD")}`, { headers: { Authorization: access_token } })
+      .then((res) => {
+        if (!res.ok) {
+          console.log(res.json())
+          throw new Error(`Network response was not ok`)
+        }
+        return res.json()
+      })
       .then(
         (result) => {
           setIsLoaded(true)

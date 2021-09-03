@@ -8,7 +8,7 @@ from flask import make_response, abort
 
 JWT_ISSUER = 'domroon.de'
 JWT_SECRET = b'canqPbW5nzW4t5QneAEVqVELvXdEX2CTmPsd8kaacWc='
-JWT_LIFETIME_SECONDS = 3600 # in production: 900s (15 min)
+JWT_LIFETIME_SECONDS = 900 # in production: 900s (15 min)
 
 #key = Fernet.generate_key()
 KEY = b'canqPbW5nzW4t5QneAEVqVELvXdEX2CTmPsd8kaacWc='
