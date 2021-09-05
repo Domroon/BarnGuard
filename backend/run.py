@@ -123,7 +123,7 @@ def _current_timestamp() -> int:
 
 
 def main():
-    connex_app.run(host='0.0.0.0', port=5000, debug=True)
+    connex_app.run(host='0.0.0.0', port=80, debug=True)
     
 
 # If we're running in stand alone mode, run the application
