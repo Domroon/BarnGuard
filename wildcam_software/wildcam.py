@@ -123,8 +123,11 @@ def upload(videoname, raw_video_name):
     show_response(video_response)
 
     # in production datetime.now() !!!
-    rand_date, rand_time = gen_random_datetime()
-    json_video_response = upload_video_json(rand_date, rand_time, raw_video_name)
+    #rand_date, rand_time = gen_random_datetime()
+    date = str(DateTime.now()).split()[0]
+    long_time = str(DateTime.now()).split()[1]
+    time=long_time.split('.')[0]
+    json_video_response = upload_video_json(date, time, raw_video_name)
     print("[VIDEO_JSON RESPONSE]")
     show_response(json_video_response)
 
