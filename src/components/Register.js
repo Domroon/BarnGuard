@@ -30,7 +30,7 @@ function Register() {
             Username oder Email existiert bereits
           </div>
           <h2 className="text-center mt-5">Registrieren</h2>
-          <form onSubmit={handleSubmit} className="m-5 card p-5">
+          <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label for="name" className="form-label">
                 Nickname
@@ -71,7 +71,7 @@ function Register() {
       <section className="register-form">
         <div className="container">
           <h2 className="text-center mt-5">Registrieren</h2>
-          <form onSubmit={handleSubmit} className="m-5 card p-5">
+          <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label for="name" className="form-label">
                 Nickname
