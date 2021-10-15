@@ -14,7 +14,7 @@ import six
 from werkzeug.exceptions import Unauthorized
 from jose import JWTError, jwt
 
-BASE_PATH = Path(os.getcwd()) 
+BASE_PATH = Path(os.getcwd())
 TARGETS = {
     "video": BASE_PATH / "video-data" / "new",
     "thumbnail": BASE_PATH / "thumbnail_pics",
@@ -56,12 +56,11 @@ def manage_thumbnails():
 
             # move the videofile out of new-Folder
             destination_folder = TARGETS["video-move"]
-            print(f'Move Video to "{destination_folder}"')
-            shutil.move(video_path, destination_folder)
+	    print(f'Move Video to "{destination_folder}"')
+            shutil.move(str(video_path), str(destination_folder))
         else:
             print(f'[WAIT] for new Upload')
             break
-
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -114,17 +113,15 @@ def generate_token(user_id):
         "exp": int(timestamp + JWT_LIFETIME_SECONDS),
         "sub": str(user_id),
     }
-
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
-
 
 def _current_timestamp() -> int:
     return int(time.time())
 
 
 def main():
-    connex_app.run(host='0.0.0.0', port=5000, debug=True)
-    
+    connex_app.run(host='domroon.de', port=80, debug=False)
+
 
 # If we're running in stand alone mode, run the application
 if __name__ == '__main__':
