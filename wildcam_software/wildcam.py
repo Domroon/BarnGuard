@@ -85,7 +85,7 @@ def rename_and_move_video(dir_list, videoname):
 
 
 def upload_video(videoname):
-    url = "http://localhost:5000/upload"
+    url = "http://domroon.de/upload"
     video_file = open(str(UPLOAD_READY/videoname), 'rb')
     files = {'file' : video_file}
 
@@ -100,7 +100,7 @@ def upload_video(videoname):
 
     
 def upload_video_json(date, time, raw_video_name):
-    url = "http://localhost:5000/api/videos"
+    url = "http://domroon.de/api/videos"
     payload = json.dumps(generate_video_json(date, time, raw_video_name))
     return requests.post(url, data=payload, headers={'Content-Type': 'application/json', 'Authorization' : 'gAAAAABhMhDkkS0ZWFKyrhFBnDxJp5r_cjV-ZXFYh4adcoCMRSwo_qcnfsqadt4nwD3XXBlYXNHNBJWyEB7FeH6qR_FVnxFa-NGLI2HPGBYCnY2avAdd5UJ1fBOR5YoVVR5O7iXE9rpnZKRWdkUAsyQ5zuQA_XquSukJvwziExE6a5TW4NTw3xQ='})
 
@@ -163,8 +163,9 @@ def main():
                     upload(videoname, raw_video_name)
                     print(f'[UPLOAD END] "{videoname}" [AT] {DateTime.now()}')
                     break
-                except requests.exceptions.ConnectionError:
+                except requests.exceptions.ConnectionError as error:
                     print(f'[CONNECTION ERROR] Try again in 5s')
+                    print(error)
                     time.sleep(5)
                 except FileNotFoundError:
                     print(f'[FileNotFoundError] The file has already been uploaded')
