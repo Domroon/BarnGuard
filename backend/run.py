@@ -13,6 +13,8 @@ import connexion
 import six
 from werkzeug.exceptions import Unauthorized
 from jose import JWTError, jwt
+import logging
+
 
 BASE_PATH = Path(os.getcwd())
 TARGETS = {
@@ -23,29 +25,46 @@ TARGETS = {
 
 ALLOWED_EXTENSIONS = {'mp4'}
 
-
 JWT_ISSUER = 'com.zalando.connexion'
 JWT_SECRET = 'change_this'
 JWT_LIFETIME_SECONDS = 600
 JWT_ALGORITHM = 'HS256'
 
+# LOGGER
+logger = logging.getLogger("main")
+logger.setLevel(logging.DEBUG)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+
+file_handler = logging.FileHandler(filename='flask_server.log', encoding='utf-8')
+file_handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter(f'%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 connex_app = config.connexion_app
 
 connex_app.add_api("swagger.yml")
 
+logger.info("START")
 
 def generate_thumbnail(video_path, thumbnail_path):
     print(f'Get Thumbnail Picture from the Video: "{video_path}"')
     with VideoFileClip(str(video_path)) as video:
         frame = video.get_frame(0)
     thumbnail_jpg = Image.fromarray(frame)
-    print(f'Save Thumbnail Picture at: "{thumbnail_path}"')
+    logger.debug(f'Save Thumbnail Picture at: "{thumbnail_path}"')
     thumbnail_jpg.save(thumbnail_path)
 
 
 def manage_thumbnails():
-    print(f'[START] [THUMBNAIL GENERATOR]')
+    logger.info('generate thumbnail')
      # videonames are a random hash number
     while True:
         dir_list = os.listdir(TARGETS["video"])
@@ -56,10 +75,10 @@ def manage_thumbnails():
 
             # move the videofile out of new-Folder
             destination_folder = TARGETS["video-move"]
-	    print(f'Move Video to "{destination_folder}"')
+            logger.debug(f'Move Video to "{destination_folder}"')
             shutil.move(str(video_path), str(destination_folder))
         else:
-            print(f'[WAIT] for new Upload')
+            logger.info('wait for new upload')
             break
 
 def allowed_file(filename):
@@ -71,21 +90,24 @@ def allowed_file(filename):
 @connex_app.route('/')
 def home():
     """
-    This function just responds to the browser ULR
+    This function just responds to the browser URL
     localhost:5000/
     :return:        the rendered template 'home.html'
     """
+    logger.debug('send index.html')
     return flask_app.send_static_file('index.html')
 
 
 @connex_app.route('/videos/<path:filename>', methods=['GET', 'POST'])
 def single_video(filename):
     videos = os.path.join(os.getcwd(), flask_app.config['VIDEO_FOLDER_PROCESSED'])
+    logger.debug("get single video")
     return send_from_directory(directory=videos, filename=filename)
 
 
 @connex_app.route('/thumbnail/<path:filename>', methods=['GET', 'POST'])
 def single_thumbnail(filename):
+    logger.debug('get thumbnail')
     thumbnails = os.path.join(os.getcwd(), flask_app.config['THUMBNAIL_FOLDER'])
     return send_from_directory(directory=thumbnails, filename=filename)
 
@@ -94,6 +116,7 @@ def single_thumbnail(filename):
 def upload_file():
     if request.method == 'POST':
         if 'file' not in request.files:
+            logger.warning('no video-file in post-request "/upload"')
             return "400"
     file = request.files['file']
     if file and allowed_file(file.filename):
@@ -102,10 +125,12 @@ def upload_file():
         manage_thumbnails()
         return "200"
     else:
+        logger.warning('videotype in post-request "/upload" is not correct')
         return "415"
 
 
 def generate_token(user_id):
+    logger.debug("generate token")
     timestamp = _current_timestamp()
     payload = {
         "iss": JWT_ISSUER,
@@ -115,12 +140,19 @@ def generate_token(user_id):
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
+
 def _current_timestamp() -> int:
     return int(time.time())
 
 
 def main():
-    connex_app.run(host='domroon.de', port=80, debug=False)
+    # host='0.0.0.0', port="5000", debug=True for test purposes
+    # host='domroon.de', port=80, debug=False in Deploy Mode
+    try: 
+        connex_app.run(host='domroon.de', port="80", debug=True)
+    except Exception as error:
+        logger.error(error)
+        raise error 
 
 
 # If we're running in stand alone mode, run the application
