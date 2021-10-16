@@ -56,11 +56,15 @@ logger.info("START")
 
 def generate_thumbnail(video_path, thumbnail_path):
     print(f'Get Thumbnail Picture from the Video: "{video_path}"')
-    with VideoFileClip(str(video_path)) as video:
-        frame = video.get_frame(0)
-    thumbnail_jpg = Image.fromarray(frame)
-    logger.debug(f'Save Thumbnail Picture at: "{thumbnail_path}"')
-    thumbnail_jpg.save(thumbnail_path)
+    try:
+        with VideoFileClip(str(video_path)) as video:
+            frame = video.get_frame(0)
+        thumbnail_jpg = Image.fromarray(frame)
+        logger.debug(f'Save Thumbnail Picture at: "{thumbnail_path}"')
+        thumbnail_jpg.save(thumbnail_path)
+    except Exception as error:
+        logger.error(error)
+        raise error
 
 
 def manage_thumbnails():
