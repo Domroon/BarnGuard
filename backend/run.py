@@ -75,6 +75,9 @@ def manage_thumbnails():
         if dir_list:
             video_path = TARGETS["video"] / dir_list[0]
             thumbnail_path = (TARGETS["thumbnail"] / video_path.name).with_suffix('.jpg')
+            # wait until the video is fully downloaded!
+            # logger.warning('Wait 10s to be sure the Video is fully downloaded')
+            time.sleep(10)
             generate_thumbnail(video_path, thumbnail_path)
 
             # move the videofile out of new-Folder
@@ -153,7 +156,7 @@ def main():
     # host='0.0.0.0', port="5000", debug=True for test purposes
     # host='domroon.de', port=80, debug=False in Deploy Mode
     try: 
-        connex_app.run(host='domroon.de', port="80", debug=True)
+        connex_app.run(host='0.0.0.0', port="5000", debug=True)
     except Exception as error:
         logger.error(error)
         raise error 
