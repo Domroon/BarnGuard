@@ -35,3 +35,4 @@ upload_ready
 
 #logs
 flask_server.log
+wildcam.log
