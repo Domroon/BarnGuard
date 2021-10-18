@@ -10,6 +10,7 @@ import time
 import shutil
 import requests
 import json
+import logging
 
 from requests.models import Response
 
@@ -17,6 +18,34 @@ from requests.models import Response
 BASE_PATH = Path(getcwd())
 PATH = BASE_PATH / "videos"
 UPLOAD_READY = BASE_PATH / "upload_ready"
+
+# development "localhost:5000"
+# deploy "domroon.de"
+NETWORK_ADDRESS="localhost:5000"4
+
+
+# create logger
+logger = logging.getLogger("main")
+logger.setLevel(logging.DEBUG)
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.ERROR)
+
+# create file handler ans set level to debug
+fh = logging.FileHandler(filename='advancedTestLog.log', mode='w', encoding='utf-8')
+fh.setLevel(logging.DEBUG)
+
+# create formatter
+formatter = logging.Formatter(f'%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+
+# add formatter to ch and fh
+ch.setFormatter(formatter)
+fh.setFormatter(formatter)
+
+# add ch and fh to logger
+logger.addHandler(ch)
+logger.addHandler(fh)
 
 
 def generate_formatted_timestamp():
@@ -85,24 +114,32 @@ def rename_and_move_video(dir_list, videoname):
 
 
 def upload_video(videoname):
-    url = "http://domroon.de/upload"
-    video_file = open(str(UPLOAD_READY/videoname), 'rb')
-    files = {'file' : video_file}
+    try:
+        url = f'http://{NETWORK_ADDRESS}/upload'
+        video_file = open(str(UPLOAD_READY/videoname), 'rb')
+        files = {'file' : video_file}
 
-    r = requests.post(url, files=files, headers={'Authorization' : 'gAAAAABhMhDkkS0ZWFKyrhFBnDxJp5r_cjV-ZXFYh4adcoCMRSwo_qcnfsqadt4nwD3XXBlYXNHNBJWyEB7FeH6qR_FVnxFa-NGLI2HPGBYCnY2avAdd5UJ1fBOR5YoVVR5O7iXE9rpnZKRWdkUAsyQ5zuQA_XquSukJvwziExE6a5TW4NTw3xQ='})
+        r = requests.post(url, files=files, headers={'Authorization' : 'gAAAAABhMhDkkS0ZWFKyrhFBnDxJp5r_cjV-ZXFYh4adcoCMRSwo_qcnfsqadt4nwD3XXBlYXNHNBJWyEB7FeH6qR_FVnxFa-NGLI2HPGBYCnY2avAdd5UJ1fBOR5YoVVR5O7iXE9rpnZKRWdkUAsyQ5zuQA_XquSukJvwziExE6a5TW4NTw3xQ='})
 
-    video_file.close()
+        video_file.close()
 
-    if r.status_code == 200:
-        os.remove(UPLOAD_READY / videoname)
-
+        if r.status_code == 200:
+            os.remove(UPLOAD_READY / videoname)
+    except Exception as error:
+        logger.error(error)
+        raise error
+        
     return r
 
     
 def upload_video_json(date, time, raw_video_name):
-    url = "http://domroon.de/api/videos"
-    payload = json.dumps(generate_video_json(date, time, raw_video_name))
-    return requests.post(url, data=payload, headers={'Content-Type': 'application/json', 'Authorization' : 'gAAAAABhMhDkkS0ZWFKyrhFBnDxJp5r_cjV-ZXFYh4adcoCMRSwo_qcnfsqadt4nwD3XXBlYXNHNBJWyEB7FeH6qR_FVnxFa-NGLI2HPGBYCnY2avAdd5UJ1fBOR5YoVVR5O7iXE9rpnZKRWdkUAsyQ5zuQA_XquSukJvwziExE6a5TW4NTw3xQ='})
+    try:
+        url = "http://{NETWORK_ADDRESS}/api/videos"
+        payload = json.dumps(generate_video_json(date, time, raw_video_name))
+        return requests.post(url, data=payload, headers={'Content-Type': 'application/json', 'Authorization' : 'gAAAAABhMhDkkS0ZWFKyrhFBnDxJp5r_cjV-ZXFYh4adcoCMRSwo_qcnfsqadt4nwD3XXBlYXNHNBJWyEB7FeH6qR_FVnxFa-NGLI2HPGBYCnY2avAdd5UJ1fBOR5YoVVR5O7iXE9rpnZKRWdkUAsyQ5zuQA_XquSukJvwziExE6a5TW4NTw3xQ='})
+    except Exception as error:
+        logger.error(error)
+        raise error
 
     # print(f'Post Json-Data for {raw_video_name}.mp4')
     # print(f'POST: {payload}')
@@ -111,22 +148,16 @@ def upload_video_json(date, time, raw_video_name):
     # print(r.text)
 
 
-def show_response(resp : Response):
-    print(f'[RESPONSE CODE] {resp.status_code}')
-    print(f'[RESPONSE BODY] "{resp.text}"')
-
-
 # correct the if-query and delete the video at sucessfully upload
 def upload(videoname, raw_video_name):
     video_response = upload_video(videoname)
-    print("[VIDEO RESPONSE]")
-    show_response(video_response)
-
+    logger.info()
+    print(f'VIDEO RESPONSE: \nRESPONSE CODE: {Response.status_code}\nRESPONSE BODY: "{Response.text}"')
+    
     # in production datetime.now() !!!
     rand_date, rand_time = gen_random_datetime()
     json_video_response = upload_video_json(rand_date, rand_time, raw_video_name)
-    print("[VIDEO_JSON RESPONSE]")
-    show_response(json_video_response)
+    logger.info(f'VIDEO_JSON RESPONSE: \nRESPONSE CODE: {Response.status_code}\nRESPONSE BODY: "{Response.text}"')
 
     if video_response.status_code != 200 and json_video_response.status_code != 201:
         return True
@@ -140,7 +171,7 @@ def main():
 
         if dir_list:
             first_videoname = dir_list[0]
-            print(f"[FOUND VIDEO] {first_videoname}")
+            logger.info(f'FOUND VIDEO "{first_videoname}"')
 
             # generate random name
             raw_video_name = f'{token_urlsafe(8)}'
@@ -150,28 +181,32 @@ def main():
             while True:
                 try:
                     rename_and_move_video(dir_list, videoname)
-                    print(f'[RENAME] "{first_videoname}" to "{videoname}"')
+                    logger.info(f'RENAME "{first_videoname}" to "{videoname}"')
                     break
                 except PermissionError:
-                    print(f'[PERMISSION ERROR] Try again in 1s')
+                    logger.error(f'PERMISSION ERROR "Try again in 1s"')
                     time.sleep(1)
 
             # try to upload until the internet connection is back
             while True:
                 try:
-                    print(f'[UPLOAD START] "{videoname}" [AT] {DateTime.now()}')
+                    print()
+                    logger.info(f'UPLOAD START "{videoname}"')
                     upload(videoname, raw_video_name)
-                    print(f'[UPLOAD END] "{videoname}" [AT] {DateTime.now()}')
+                    logger.info(f'UPLOAD END "{videoname}"')
                     break
                 except requests.exceptions.ConnectionError as error:
-                    print(f'[CONNECTION ERROR] Try again in 5s')
-                    print(error)
+                    logger.error(f'CONNECTION ERROR Try again in 5s: \n {error}')
                     time.sleep(5)
                 except FileNotFoundError:
-                    print(f'[FileNotFoundError] The file has already been uploaded')
+                    logger.error(f'FileNotFoundError "The file has already been uploaded"')
+                    break
                 except PermissionError:
-                    print(f'[PERMISSION ERROR] Try again in 0.5s')
+                    logger.error(f'PERMISSION ERROR "Try again in 0.5s"')
                     time.sleep(0.5)
+                except Exception as error:
+                    logger.error(error)
+                    raise error
 
         time.sleep(1)
             
