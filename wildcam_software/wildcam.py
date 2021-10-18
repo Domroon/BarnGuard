@@ -21,7 +21,7 @@ UPLOAD_READY = BASE_PATH / "upload_ready"
 
 # development "localhost:5000"
 # deploy "domroon.de"
-NETWORK_ADDRESS="localhost:5000"4
+NETWORK_ADDRESS="domroon.de"
 
 
 # create logger
@@ -30,10 +30,10 @@ logger.setLevel(logging.DEBUG)
 
 # create console handler and set level to debug
 ch = logging.StreamHandler()
-ch.setLevel(logging.ERROR)
+ch.setLevel(logging.DEBUG)
 
 # create file handler ans set level to debug
-fh = logging.FileHandler(filename='advancedTestLog.log', mode='w', encoding='utf-8')
+fh = logging.FileHandler(filename='wildcam.log', encoding='utf-8')
 fh.setLevel(logging.DEBUG)
 
 # create formatter
@@ -126,19 +126,19 @@ def upload_video(videoname):
         if r.status_code == 200:
             os.remove(UPLOAD_READY / videoname)
     except Exception as error:
-        logger.error(error)
+        logger.error(f'Upload Video Error: \n{error}')
         raise error
-        
+
     return r
 
     
 def upload_video_json(date, time, raw_video_name):
     try:
-        url = "http://{NETWORK_ADDRESS}/api/videos"
+        url = f'http://{NETWORK_ADDRESS}/api/videos'
         payload = json.dumps(generate_video_json(date, time, raw_video_name))
         return requests.post(url, data=payload, headers={'Content-Type': 'application/json', 'Authorization' : 'gAAAAABhMhDkkS0ZWFKyrhFBnDxJp5r_cjV-ZXFYh4adcoCMRSwo_qcnfsqadt4nwD3XXBlYXNHNBJWyEB7FeH6qR_FVnxFa-NGLI2HPGBYCnY2avAdd5UJ1fBOR5YoVVR5O7iXE9rpnZKRWdkUAsyQ5zuQA_XquSukJvwziExE6a5TW4NTw3xQ='})
     except Exception as error:
-        logger.error(error)
+        logger.error(f'Upload Video Json Error: \n{error}')
         raise error
 
     # print(f'Post Json-Data for {raw_video_name}.mp4')
@@ -151,13 +151,12 @@ def upload_video_json(date, time, raw_video_name):
 # correct the if-query and delete the video at sucessfully upload
 def upload(videoname, raw_video_name):
     video_response = upload_video(videoname)
-    logger.info()
-    print(f'VIDEO RESPONSE: \nRESPONSE CODE: {Response.status_code}\nRESPONSE BODY: "{Response.text}"')
+    logger.info(f'VIDEO RESPONSE: \nRESPONSE CODE: {video_response.status_code}\nRESPONSE BODY: "{video_response.text}"')
     
     # in production datetime.now() !!!
     rand_date, rand_time = gen_random_datetime()
     json_video_response = upload_video_json(rand_date, rand_time, raw_video_name)
-    logger.info(f'VIDEO_JSON RESPONSE: \nRESPONSE CODE: {Response.status_code}\nRESPONSE BODY: "{Response.text}"')
+    logger.info(f'VIDEO_JSON RESPONSE: \nRESPONSE CODE: {json_video_response.status_code}\nRESPONSE BODY: "{json_video_response.text}"')
 
     if video_response.status_code != 200 and json_video_response.status_code != 201:
         return True
