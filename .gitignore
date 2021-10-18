@@ -32,3 +32,6 @@ package-lock.json
 #datas
 video-data
 upload_ready
+
+#logs
+flask_server.log
