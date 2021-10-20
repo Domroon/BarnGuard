@@ -1,0 +1,12 @@
+from python_tsl2591 import tsl2591
+import time
+
+def main():
+	tsl = tsl2591() #initialize
+
+	# Read raw values (full spectrum and infrared spectrum)
+	full, ir = tsl.get_full_luminosity()#	lux = tsl.calculate_lux(full, ir)
+
+
+if __name__ == "__main__":
+	main()
