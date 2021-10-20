@@ -34,7 +34,7 @@ ch.setLevel(logging.DEBUG)
 
 # create file handler ans set level to debug
 fh = logging.FileHandler(filename='wildcam.log', encoding='utf-8')
-fh.setLevel(logging.DEBUG)
+fh.setLevel(logging.INFO)
 
 # create formatter
 formatter = logging.Formatter(f'%(asctime)s [%(levelname)s] %(name)s: %(message)s')
@@ -176,6 +176,7 @@ def upload(videoname, raw_video_name):
 async def transmit_video_file():
     logger.debug(f'WAITING for Videofile at "{PATH}"')
     while True:
+        logger.debug('"transmit video" running')
         dir_list = listdir(path=PATH)
 
         if dir_list:
@@ -231,16 +232,16 @@ async def waiting_for_movement():
 
     try:
         while True:
+            logger.debug('movement" running')
             movement = GPIO.input(24)
 
             if movement == 1 and active == 0:
-                print("Bewegung erkannt")
-                print(DateTime.now())
+                logger.info("movement detected")
+                # add here a function that records a video with the camera
                 active = 1
             elif movement == 0 and active == 1:
-                print("Keine Bewegung")
                 active = 0
-
+        
             await asyncio.sleep(0.1)
 
     except KeyboardInterrupt:
