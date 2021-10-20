@@ -650,3 +650,23 @@ RESPONSE BODY: "200"
 RESPONSE CODE: 201
 RESPONSE BODY: ""e7PiT8Q-igk.mp4"" successfully created"
 2021-10-18 11:07:12,099 [INFO] main: UPLOAD END "e7PiT8Q-igk.mp4"
+2021-10-20 12:26:14,185 [INFO] main: START wildcam software
+2021-10-20 12:30:54,722 [INFO] main: START wildcam software
+2021-10-20 12:31:51,526 [INFO] main: START wildcam software
+2021-10-20 12:32:17,753 [INFO] main: START wildcam software!
+2021-10-20 12:32:49,891 [INFO] main: START wildcam software
+2021-10-20 12:34:16,639 [INFO] main: START wildcam software
+2021-10-20 12:34:16,641 [DEBUG] main: WAITING for Videofile at "/media/sf_workspace/barn-guard-website/wildcam_software/videos"
+2021-10-20 12:35:00,070 [INFO] main: START wildcam software
+2021-10-20 12:58:19,192 [ERROR] main: No module named 'RPi'
+2021-10-20 12:58:19,194 [INFO] main: START wildcam software
+2021-10-20 12:58:19,194 [DEBUG] main: WAITING for Videofile at "/media/sf_workspace/barn-guard-website/wildcam_software/videos"
+2021-10-20 13:00:02,104 [ERROR] main: No module named 'RPi'
+2021-10-20 13:00:02,106 [INFO] main: START wildcam software
+2021-10-20 13:00:02,107 [DEBUG] main: WAITING for Videofile at "/media/sf_workspace/barn-guard-website/wildcam_software/videos"
+2021-10-20 13:02:21,292 [ERROR] main: No module named 'RPi'
+2021-10-20 13:02:58,276 [CRITICAL] main: No module named 'RPi'
+2021-10-20 13:03:31,047 [CRITICAL] main: No module named 'RPi'
+2021-10-20 13:03:47,859 [CRITICAL] main: No module named 'RPi'
+2021-10-20 13:04:29,245 [CRITICAL] main: No module named 'RPi'
+Please run the Program on a RaspberryPi

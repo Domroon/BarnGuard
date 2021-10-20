@@ -11,9 +11,9 @@ import shutil
 import requests
 import json
 import logging
-
 from requests.models import Response
-
+import asyncio
+import sys
 
 BASE_PATH = Path(getcwd())
 PATH = BASE_PATH / "videos"
@@ -46,6 +46,13 @@ fh.setFormatter(formatter)
 # add ch and fh to logger
 logger.addHandler(ch)
 logger.addHandler(fh)
+
+
+try:
+    import RPi.GPIO as GPIO
+except ModuleNotFoundError as error:
+    logger.critical(f'{error}\nPlease run the Program on a RaspberryPi')
+    sys.exit()
 
 
 def generate_formatted_timestamp():
@@ -166,8 +173,8 @@ def upload(videoname, raw_video_name):
     else:
         return False
 
-
-def main():
+async def transmit_video_file():
+    logger.debug(f'WAITING for Videofile at "{PATH}"')
     while True:
         dir_list = listdir(path=PATH)
 
@@ -210,8 +217,43 @@ def main():
                     logger.error(error)
                     raise error
 
-        time.sleep(1)
-            
+        await asyncio.sleep(1)
 
+
+async def waiting_for_movement():
+    logger.debug("WAITING for movement")
+    GPIO.setmode(GPIO.BCM)
+    pin=24
+    GPIO.setup(pin, GPIO.IN)
+
+    movement= 0
+    active = 0
+
+    try:
+        while True:
+            movement = GPIO.input(24)
+
+            if movement == 1 and active == 0:
+                print("Bewegung erkannt")
+                print(DateTime.now())
+                active = 1
+            elif movement == 0 and active == 1:
+                print("Keine Bewegung")
+                active = 0
+
+            await asyncio.sleep(0.1)
+
+    except KeyboardInterrupt:
+        GPIO.cleanup()
+
+
+async def main():
+    logger.info("START wildcam software")
+    transmit_task = asyncio.create_task(transmit_video_file())
+    movement_task = asyncio.create_task(waiting_for_movement())
+    await transmit_task
+    await movement_task
+    
+    
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
