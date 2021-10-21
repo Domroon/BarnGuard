@@ -14,6 +14,8 @@ import logging
 from requests.models import Response
 import asyncio
 import sys
+import time
+import subprocess
 
 BASE_PATH = Path(getcwd())
 PATH = BASE_PATH / "videos"
@@ -23,6 +25,7 @@ UPLOAD_READY = BASE_PATH / "upload_ready"
 # deploy "domroon.de"
 NETWORK_ADDRESS="domroon.de"
 
+VIDEO_DURATION = 10
 
 # create logger
 logger = logging.getLogger("main")
@@ -50,6 +53,7 @@ logger.addHandler(fh)
 
 try:
     import RPi.GPIO as GPIO
+    import picamera
 except ModuleNotFoundError as error:
     logger.critical(f'{error}\nPlease run the Program on a RaspberryPi')
     sys.exit()
@@ -173,8 +177,9 @@ def upload(videoname, raw_video_name):
     else:
         return False
 
+
 async def transmit_video_file():
-    logger.debug(f'WAITING for Videofile at "{PATH}"')
+    logger.info(f'WAITING for Videofile at "{PATH}"')
     while True:
         logger.debug('"transmit video" running')
         dir_list = listdir(path=PATH)
@@ -222,7 +227,7 @@ async def transmit_video_file():
 
 
 async def waiting_for_movement():
-    logger.debug("WAITING for movement")
+    logger.info("WAITING for movement")
     GPIO.setmode(GPIO.BCM)
     pin=24
     GPIO.setup(pin, GPIO.IN)
@@ -237,7 +242,7 @@ async def waiting_for_movement():
 
             if movement == 1 and active == 0:
                 logger.info("movement detected")
-                # add here a function that records a video with the camera
+                capture_video(VIDEO_DURATION)
                 active = 1
             elif movement == 0 and active == 1:
                 active = 0
@@ -248,10 +253,31 @@ async def waiting_for_movement():
         GPIO.cleanup()
 
 
+def capture_video(duration):
+    with picamera.PiCamera() as camera:
+        camera.resolution = (640, 480)
+        time.sleep(1)
+        raw_video_name = f'{token_urlsafe(8)}'
+        filename = f'{raw_video_name}.h264'
+        end_filename = f'{raw_video_name}.mp4'
+        camera.start_recording(filename)
+        logger.info(f'START capturing video "{filename}"')
+        camera.wait_recording(duration)
+        camera.stop_recording()
+        logger.info(f'END capturing video "{filename}"')
+
+    subprocess.run(["MP4Box", "-add", f'{filename}', f'{end_filename}'])
+    logger.info(f'CONVERTED "{raw_video_name}" from h264 to mp4 dataformat')
+    
+    shutil.move(str(BASE_PATH / end_filename), str(PATH))
+    logger.info(f'MOVE "{end_filename}" to ./video')
+    
+
 async def main():
     logger.info("START wildcam software")
     transmit_task = asyncio.create_task(transmit_video_file())
     movement_task = asyncio.create_task(waiting_for_movement())
+
     await transmit_task
     await movement_task
     
