@@ -70,23 +70,28 @@ def generate_thumbnail(video_path, thumbnail_path):
 def manage_thumbnails():
     logger.info('generate thumbnail')
      # videonames are a random hash number
-    while True:
-        dir_list = os.listdir(TARGETS["video"])
-        if dir_list:
-            video_path = TARGETS["video"] / dir_list[0]
-            thumbnail_path = (TARGETS["thumbnail"] / video_path.name).with_suffix('.jpg')
-            # wait until the video is fully downloaded!
-            # logger.warning('Wait 10s to be sure the Video is fully downloaded')
-            time.sleep(10)
-            generate_thumbnail(video_path, thumbnail_path)
+    try:
+        while True:
+            dir_list = os.listdir(TARGETS["video"])
+            if dir_list:
+                video_path = TARGETS["video"] / dir_list[0]
+                thumbnail_path = (TARGETS["thumbnail"] / video_path.name).with_suffix('.jpg')
+                # wait until the video is fully downloaded!
+                # logger.warning('Wait 10s to be sure the Video is fully downloaded')
+                time.sleep(10)
+                generate_thumbnail(video_path, thumbnail_path)
 
-            # move the videofile out of new-Folder
-            destination_folder = TARGETS["video-move"]
-            logger.debug(f'Move Video to "{destination_folder}"')
-            shutil.move(str(video_path), str(destination_folder))
-        else:
-            logger.info('wait for new upload')
-            break
+                # move the videofile out of new-Folder
+                destination_folder = TARGETS["video-move"]
+                logger.debug(f'Move Video to "{destination_folder}"')
+                shutil.move(str(video_path), str(destination_folder))
+            else:
+                logger.info('wait for new upload')
+                break
+    except Exception as error:
+        logger.error(error)
+        raise error
+
 
 def allowed_file(filename):
     return '.' in filename and \
