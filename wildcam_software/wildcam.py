@@ -95,7 +95,29 @@ class TransmitFile:
     def __init__(self):
         pass
 
-    
+
+class MovementDetector:
+    def __init__(self, logger):
+        self.logger = logger
+        self.movement = False
+
+    def start(self):
+        motion_thread = threading.Thread(target=self._detect, args=(self,))
+        motion_thread.daemon=True
+        self.logger.info("START motion Thread")
+        motion_thread.start()
+        self.logger.info("STOP motion Thread")
+
+    def _detect(self):
+        while True:
+            self.logger.debug('movement detection is running')
+            self.movement = GPIO.input(24)
+            if self.movement:    
+                self.logger.info("DETECTED motion")
+                return True
+
+            time.sleep(0.1)
+
 
 def generate_formatted_timestamp():
     now = str(DateTime.now()).split(' ')
@@ -265,10 +287,10 @@ async def transmit_video_file():
 
 
 def detect_movement():
-    logger.info("WAITING for movement")
-    GPIO.setmode(GPIO.BCM)
-    pin=24
-    GPIO.setup(pin, GPIO.IN)
+    # logger.info("WAITING for movement")
+    # GPIO.setmode(GPIO.BCM)
+    # pin=24
+    # GPIO.setup(pin, GPIO.IN)
 
     movement= 0
     active = 0
@@ -374,6 +396,15 @@ def main():
     # video.record()
 
     #recording_thread = threading.Thread()
+    motion_detector = MovementDetector(motion_logger)
+
+    while True:
+        if motion_detector.movement:
+            main_logger.debug("SET movement back to False")
+            motion_detector.movement = False
+            main_logger.debug("Here would start the video recording!")
+
+        time.sleep(1)
 
     GPIO.cleanup()
     main_logger.info("CLEAN all GPIO Pins")
