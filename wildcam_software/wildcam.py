@@ -18,6 +18,14 @@ import subprocess
 from moviepy.editor import VideoFileClip
 from PIL import Image
 
+try:
+    import RPi.GPIO as GPIO
+    import picamera
+except ModuleNotFoundError as error:
+    print(f'{error}\nPlease run the Program on a RaspberryPi')
+    sys.exit()
+
+
 BASE_PATH = Path(getcwd())
 FILES_UPLOAD = BASE_PATH / "files_upload"
 # UPLOAD_READY = BASE_PATH / "upload_ready"
@@ -25,39 +33,6 @@ FILES_UPLOAD = BASE_PATH / "files_upload"
 # development "localhost:5000"
 # deploy "domroon.de"
 NETWORK_ADDRESS="domroon.de"
-
-VIDEO_DURATION = 10
-
-# create logger
-logger = logging.getLogger("main")
-logger.setLevel(logging.DEBUG)
-
-# create console handler and set level to debug
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-
-# create file handler ans set level to debug
-fh = logging.FileHandler(filename='wildcam.log', encoding='utf-8')
-fh.setLevel(logging.INFO)
-
-# create formatter
-formatter = logging.Formatter(f'%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-
-# add formatter to ch and fh
-ch.setFormatter(formatter)
-fh.setFormatter(formatter)
-
-# add ch and fh to logger
-logger.addHandler(ch)
-logger.addHandler(fh)
-
-
-# try:
-#     import RPi.GPIO as GPIO
-#     import picamera
-# except ModuleNotFoundError as error:
-#     logger.critical(f'{error}\nPlease run the Program on a RaspberryPi')
-#     sys.exit()
 
 
 class Video:
@@ -336,14 +311,6 @@ def capture_video(duration):
     
 
 def main():
-    pass
-    # logger.info("START wildcam software")
-    # transmit_task = asyncio.create_task(transmit_video_file())
-    # movement_task = asyncio.create_task(waiting_for_movement())
-
-    # await transmit_task
-    # await movement_task
-    
     # Configure Loggers
     console_handler = logging.StreamHandler()
     file_handler = logging.FileHandler(filename='wildcam.log', encoding='utf-8')
@@ -353,12 +320,27 @@ def main():
     console_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
 
+    main_logger = logging.getLogger("main")
+    main_logger.setLevel(logging.DEBUG)
+    main_logger.addHandler(console_handler)
+    main_logger.addHandler(file_handler)
+
+    main_logger.info("START wildcam software")
+
+    if 'files_upload' not in listdir():
+        os.mkdir(BASE_PATH / 'files_upload')
+        main_logger.info('CREATED "files_upload" folder')
+    else:
+        main_logger.info('FOUND "files_upload" folder')
+
     video_logger = logging.getLogger("video")
     video_logger.setLevel(logging.DEBUG)
     video_logger.addHandler(console_handler)
     video_logger.addHandler(file_handler)
 
     video = Video(video_logger)
+    # test video recording
+    video.record()
     
 if __name__ == '__main__':
     main()
