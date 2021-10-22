@@ -61,13 +61,12 @@ logger.addHandler(fh)
 
 
 class Video:
-    def __init__(self, name=None):
+    def __init__(self, logger, name=None, duration=10):
         self.name = name
         self.thumbnail = None
-        # self.file = file
-        # self.record_datetime = record_datetime
-        # self.logger = logger
-        # self.duration = duration
+        self.record_datetime = None
+        self.logger = logger
+        self.duration = duration
 
     @property
     def name(self):
@@ -75,39 +74,43 @@ class Video:
 
     @name.setter
     def name(self, name):
-        self._name = f'{token_urlsafe(8)}'
+        if name == None:
+            self._name = f'{token_urlsafe(8)}'
+        else:
+            self._name = name
 
     def record(self):
         with picamera.PiCamera() as camera:
             camera.resolution = (640, 480)
             # camera need time to start
             time.sleep(1)
+            self.record_datetime = DateTime.now()
             camera.start_recording(f'{self.name}.h264')
-            logger.info(f'CAPTURING video "{self.name}"')
+            self.logger.info(f'CAPTURING video "{self.name}"')
             camera.wait_recording(self.duration)
             camera.stop_recording()
-        logger.info(f'CAPTURED video "{self.name}"')
+        self.logger.info(f'CAPTURED video "{self.name}"')
         self._convert()
         self._generate_thumbnail()
         self._move_thumbnailfile()
         self._move_videofile()
 
     def _move_videofile(self, file_extension):
-        logger.info(f'MOVE "{self.name}"\nfrom {BASE_PATH}\nto {FILES_UPLOAD}')
+        self.logger.info(f'MOVE "{self.name}"\nfrom {BASE_PATH}\nto {FILES_UPLOAD}')
         shutil.move(str(BASE_PATH / f'{self.name}.mp4'), str(FILES_UPLOAD / f'{self.name}.mp4'))
 
     def _generate_thumbnail(self):
-        logger.info(f'CREATE thumbnail for video "{self.name}"')
+        self.logger.info(f'CREATE thumbnail for video "{self.name}"')
         with VideoFileClip((str(BASE_PATH / f'{self.name}.mp4'))) as videofile:
             frame = videofile.get_frame(0)
         self.thumbnail = Image.fromarray(frame)
 
     def _move_thumbnailfile(self):
         self.thumbnail.save(str(FILES_UPLOAD / f'{self.name}.jpg'))
-        logger.info(f'SAVED Thumbnail {self.name}.jpg at: {FILES_UPLOAD}')
+        self.logger.info(f'SAVED Thumbnail {self.name}.jpg at: {FILES_UPLOAD}')
 
     def _convert(self):
-        logger.info(f'CONVERT "{self.name}" from "h264" to "mp4"')
+        self.logger.info(f'CONVERT "{self.name}" from "h264" to "mp4"')
         subprocess.run(["MP4Box", "-add", f'{self.name}.h264', f'{self.name}.mp4'])
         os.remove(str(BASE_PATH / f'{self.name}.h264'))
 
@@ -341,6 +344,7 @@ def main():
     # await movement_task
     video = Video()
     print(video.name)
+    print(video.duration)
     
     
 if __name__ == '__main__':
