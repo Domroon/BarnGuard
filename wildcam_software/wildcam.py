@@ -114,11 +114,12 @@ class Video:
         subprocess.run(["MP4Box", "-add", f'{self.name}.h264', f'{self.name}.mp4'])
         os.remove(str(BASE_PATH / f'{self.name}.h264'))
 
-    
+
 class TransmitFile:
     def __init__(self):
         pass
 
+    
 
 def generate_formatted_timestamp():
     now = str(DateTime.now()).split(' ')
@@ -342,10 +343,22 @@ def main():
 
     # await transmit_task
     # await movement_task
-    video = Video()
-    print(video.name)
-    print(video.duration)
     
+    # Configure Loggers
+    console_handler = logging.StreamHandler()
+    file_handler = logging.FileHandler(filename='wildcam.log', encoding='utf-8')
+    console_handler.setLevel(logging.DEBUG)
+    file_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter(f'%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+    console_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
+
+    video_logger = logging.getLogger("video")
+    video_logger.setLevel(logging.DEBUG)
+    video_logger.addHandler(console_handler)
+    video_logger.addHandler(file_handler)
+
+    video = Video(video_logger)
     
 if __name__ == '__main__':
     main()
