@@ -70,7 +70,7 @@ class Video:
         self._move_thumbnailfile()
         self._move_videofile()
 
-    def _move_videofile(self, file_extension):
+    def _move_videofile(self):
         self.logger.info(f'MOVE "{self.name}"\nfrom {BASE_PATH}\nto {FILES_UPLOAD}')
         shutil.move(str(BASE_PATH / f'{self.name}.mp4'), str(FILES_UPLOAD / f'{self.name}.mp4'))
 
@@ -325,6 +325,11 @@ def main():
     main_logger.addHandler(console_handler)
     main_logger.addHandler(file_handler)
 
+    video_logger = logging.getLogger("video")
+    video_logger.setLevel(logging.DEBUG)
+    video_logger.addHandler(console_handler)
+    video_logger.addHandler(file_handler)
+
     main_logger.info("START wildcam software")
 
     if 'files_upload' not in listdir():
@@ -333,12 +338,8 @@ def main():
     else:
         main_logger.info('FOUND "files_upload" folder')
 
-    video_logger = logging.getLogger("video")
-    video_logger.setLevel(logging.DEBUG)
-    video_logger.addHandler(console_handler)
-    video_logger.addHandler(file_handler)
-
     video = Video(video_logger)
+
     # test video recording
     video.record()
     
