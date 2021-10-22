@@ -397,6 +397,7 @@ def main():
 
     #recording_thread = threading.Thread()
     motion_detector = MovementDetector(motion_logger)
+    motion_detector.start()
 
     while True:
         if motion_detector.movement:
