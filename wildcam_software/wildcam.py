@@ -1,7 +1,6 @@
 from datetime import datetime as DateTime
 import datetime
 from random import randint
-import re
 from secrets import token_urlsafe
 import os
 from os import getcwd, listdir
@@ -11,7 +10,6 @@ import shutil
 import requests
 import json
 import logging
-from requests.models import Response
 import asyncio
 import sys
 import time
