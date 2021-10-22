@@ -15,9 +15,12 @@ import sys
 import time
 import subprocess
 
+from moviepy.editor import VideoFileClip
+from PIL import Image
+
 BASE_PATH = Path(getcwd())
-PATH = BASE_PATH / "videos"
-UPLOAD_READY = BASE_PATH / "upload_ready"
+FILES_UPLOAD = BASE_PATH / "files_upload"
+# UPLOAD_READY = BASE_PATH / "upload_ready"
 
 # development "localhost:5000"
 # deploy "domroon.de"
@@ -49,12 +52,69 @@ logger.addHandler(ch)
 logger.addHandler(fh)
 
 
-try:
-    import RPi.GPIO as GPIO
-    import picamera
-except ModuleNotFoundError as error:
-    logger.critical(f'{error}\nPlease run the Program on a RaspberryPi')
-    sys.exit()
+# try:
+#     import RPi.GPIO as GPIO
+#     import picamera
+# except ModuleNotFoundError as error:
+#     logger.critical(f'{error}\nPlease run the Program on a RaspberryPi')
+#     sys.exit()
+
+
+class Video:
+    def __init__(self, name=None):
+        self.name = name
+        self.thumbnail = None
+        # self.file = file
+        # self.record_datetime = record_datetime
+        # self.logger = logger
+        # self.duration = duration
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        self._name = f'{token_urlsafe(8)}'
+
+    def record(self):
+        with picamera.PiCamera() as camera:
+            camera.resolution = (640, 480)
+            # camera need time to start
+            time.sleep(1)
+            camera.start_recording(f'{self.name}.h264')
+            logger.info(f'CAPTURING video "{self.name}"')
+            camera.wait_recording(self.duration)
+            camera.stop_recording()
+        logger.info(f'CAPTURED video "{self.name}"')
+        self._convert()
+        self._generate_thumbnail()
+        self._move_thumbnailfile()
+        self._move_videofile()
+
+    def _move_videofile(self, file_extension):
+        logger.info(f'MOVE "{self.name}"\nfrom {BASE_PATH}\nto {FILES_UPLOAD}')
+        shutil.move(str(BASE_PATH / f'{self.name}.mp4'), str(FILES_UPLOAD / f'{self.name}.mp4'))
+
+    def _generate_thumbnail(self):
+        logger.info(f'CREATE thumbnail for video "{self.name}"')
+        with VideoFileClip((str(BASE_PATH / f'{self.name}.mp4'))) as videofile:
+            frame = videofile.get_frame(0)
+        self.thumbnail = Image.fromarray(frame)
+
+    def _move_thumbnailfile(self):
+        self.thumbnail.save(str(FILES_UPLOAD / f'{self.name}.jpg'))
+        logger.info(f'SAVED Thumbnail {self.name}.jpg at: {FILES_UPLOAD}')
+
+    def _convert(self):
+        logger.info(f'CONVERT "{self.name}" from "h264" to "mp4"')
+        subprocess.run(["MP4Box", "-add", f'{self.name}.h264', f'{self.name}.mp4'])
+        os.remove(str(BASE_PATH / f'{self.name}.h264'))
+
+    
+class TransmitFile:
+    def __init__(self):
+        pass
 
 
 def generate_formatted_timestamp():
@@ -271,14 +331,17 @@ def capture_video(duration):
     logger.info(f'MOVE "{end_filename}" to ./video')
     
 
-async def main():
-    logger.info("START wildcam software")
-    transmit_task = asyncio.create_task(transmit_video_file())
-    movement_task = asyncio.create_task(waiting_for_movement())
+def main():
+    pass
+    # logger.info("START wildcam software")
+    # transmit_task = asyncio.create_task(transmit_video_file())
+    # movement_task = asyncio.create_task(waiting_for_movement())
 
-    await transmit_task
-    await movement_task
+    # await transmit_task
+    # await movement_task
+    video = Video()
+    print(video.name)
     
     
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
