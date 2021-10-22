@@ -14,6 +14,7 @@ import asyncio
 import sys
 import time
 import subprocess
+import threading
 
 from moviepy.editor import VideoFileClip
 from PIL import Image
@@ -263,7 +264,7 @@ async def transmit_video_file():
         await asyncio.sleep(1)
 
 
-async def waiting_for_movement():
+def detect_movement():
     logger.info("WAITING for movement")
     GPIO.setmode(GPIO.BCM)
     pin=24
@@ -284,7 +285,7 @@ async def waiting_for_movement():
             elif movement == 0 and active == 1:
                 active = 0
         
-            await asyncio.sleep(0.1)
+            time.sleep(0.1)
 
     except KeyboardInterrupt:
         GPIO.cleanup()
@@ -310,6 +311,28 @@ def capture_video(duration):
     logger.info(f'MOVE "{end_filename}" to ./video')
     
 
+def setup_GPIO(main_logger):
+
+    GPIO.setmode(GPIO.BCM)
+
+    # infrared motion detector
+    GPIO.setup(24, GPIO.IN)
+
+    # DHT22 (humidity, temperature)
+    GPIO.setup(23, GPIO.IN)
+
+    # Relais for 950nm LEDs
+    GPIO.setup(25, GPIO.OUT)
+
+    # Relais for 850bm LEDs
+    GPIO.setup(12, GPIO.OUT)
+
+    # Relais for Solar Panel
+    GPIO.setup(16, GPIO.OUT)
+        
+    main_logger.info("CONFIGURE all GPIO IN and OUTs sucessfully")
+
+
 def main():
     # Configure Loggers
     console_handler = logging.StreamHandler()
@@ -330,6 +353,11 @@ def main():
     video_logger.addHandler(console_handler)
     video_logger.addHandler(file_handler)
 
+    motion_logger = logging.getLogger("motion_detector")
+    motion_logger.setLevel(logging.DEBUG)
+    motion_logger.addHandler(console_handler)
+    motion_logger.addHandler(file_handler)
+
     main_logger.info("START wildcam software")
 
     if 'files_upload' not in listdir():
@@ -338,10 +366,17 @@ def main():
     else:
         main_logger.info('FOUND "files_upload" folder')
 
-    video = Video(video_logger)
+    setup_GPIO(main_logger)
+
+    #video = Video(video_logger)
 
     # test video recording
-    video.record()
+    # video.record()
+
+    #recording_thread = threading.Thread()
+
+    GPIO.cleanup()
+    main_logger.info("CLEAN all GPIO Pins")
     
 if __name__ == '__main__':
     main()
