@@ -100,21 +100,24 @@ class MovementDetector:
     def __init__(self, logger):
         self.logger = logger
         self.movement = False
+        self.active = False
+        self.thread = None
 
     def start(self):
-        motion_thread = threading.Thread(target=self._detect, args=(self,))
-        motion_thread.daemon=True
+        self.thread = threading.Thread(target=self._detect)
+        self.thread.daemon=True
         self.logger.info("START motion Thread")
-        motion_thread.start()
-        self.logger.info("STOP motion Thread")
+        self.thread.start()
 
     def _detect(self):
         while True:
             self.logger.debug('movement detection is running')
             self.movement = GPIO.input(24)
-            if self.movement:    
+            if self.movement and self.active == False:
+                self.active = True
                 self.logger.info("DETECTED motion")
-                return True
+            elif self.movement == False and self.active == True:
+                self.active = False
 
             time.sleep(0.1)
 
@@ -376,7 +379,7 @@ def main():
     video_logger.addHandler(file_handler)
 
     motion_logger = logging.getLogger("motion_detector")
-    motion_logger.setLevel(logging.DEBUG)
+    motion_logger.setLevel(logging.INFO)
     motion_logger.addHandler(console_handler)
     motion_logger.addHandler(file_handler)
 
@@ -390,25 +393,22 @@ def main():
 
     setup_GPIO(main_logger)
 
-    #video = Video(video_logger)
-
-    # test video recording
-    # video.record()
-
-    #recording_thread = threading.Thread()
     motion_detector = MovementDetector(motion_logger)
     motion_detector.start()
 
-    while True:
-        if motion_detector.movement:
-            main_logger.debug("SET movement back to False")
-            motion_detector.movement = False
-            main_logger.debug("Here would start the video recording!")
-
-        time.sleep(1)
-
-    GPIO.cleanup()
-    main_logger.info("CLEAN all GPIO Pins")
+    try:
+        recording = False
+        while True:
+            if motion_detector.active and not recording:
+                recording = True
+                video = Video(video_logger)
+                video.record()
+                del video
+                recording = False
+            time.sleep(1)
+    finally:
+        GPIO.cleanup()
+        main_logger.info("CLEAN all GPIO Pins")
     
 if __name__ == '__main__':
     main()
