@@ -29,9 +29,10 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 
-#datas
+#data
 video-data
 upload_ready
+test.json
 
 #logs
 flask_server.log
