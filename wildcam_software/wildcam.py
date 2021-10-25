@@ -18,6 +18,13 @@ import threading
 
 from moviepy.editor import VideoFileClip
 from PIL import Image
+from python_tsl2591 import tsl2591
+import board
+import adafruit_dht
+import smbus2
+import bme280
+from ina219 import INA219
+from ina219 import DeviceRangeError
 
 try:
     import RPi.GPIO as GPIO
@@ -29,11 +36,12 @@ except ModuleNotFoundError as error:
 
 BASE_PATH = Path(getcwd())
 FILES_UPLOAD = BASE_PATH / "files_upload"
-# UPLOAD_READY = BASE_PATH / "upload_ready"
 
 # development "localhost:5000"
 # deploy "domroon.de"
 NETWORK_ADDRESS="domroon.de"
+SHUNT_OHMS = 0.1
+MAX_EXPECTED_AMPS = 0.2
 
 
 class Video:
@@ -120,6 +128,65 @@ class MovementDetector:
                 self.active = False
 
             time.sleep(0.1)
+
+
+class SensorData:
+    def __init__(self):
+        self.tslDevice = tsl2591()
+        self.dhtDevice = adafruit_dht.DHT22(board.D23, use_pulseio=True)
+        self.bme280Device = bme280.load(smbus2.SMBus(1), 0x76)
+        self.solarDevice = INA219(SHUNT_OHMS, address=0x40)
+        self.solarDevice.configure()
+        self.powerbankDevice = INA219(SHUNT_OHMS, address=0x41)
+        self.powerbankDevice.configure()
+        self.extBatDevice = INA219(SHUNT_OHMS, address=0x44)
+        self.extBatDevice.configure()
+
+    def read_brightness(self):
+        # unit: lux
+        brightness = self.tslDevice.get_current()
+        return round(brightness["lux"], 3) # integer?
+
+    def read_temperature(self):
+        # unit: °C
+        dht_temperature = self.dhtDevice.temperature
+        bme280_data = bme280.sample(smbus2.SMBus(1), 0x76, self.bme280Device)
+        bme280_temperature = bme280_data.temperature
+        return (dht_temperature + bme280_temperature) / 2
+
+    def read_humidity(self):
+        return f'{self.dhtDevice.humidity}%'
+
+    def read_pressure(self):
+        # unit: hPa
+        bme280_data = bme280.sample(smbus2.SMBus(1), 0x76, self.bme280Device)
+        return bme280_data.pressure
+
+    def read_solar_voltage(self):
+        # unit: V
+        return self.solarDevice.supply_voltage()
+
+    def read_solar_current(self):
+        # unit: mA
+        return self.solarDevice.current()
+
+    def read_powerbank_voltage(self):
+        return self.powerbankDevice.supply_voltage()
+
+    def read_powerbank_current(self):
+        return self.powerbankDevice.current()
+
+    def read_ext_bat_voltage(self):
+        return self.extBatDevice.supply_voltage()
+
+    def read_ext_bat_current(self):
+        return self.extBatDevice.current()
+
+
+class SaveFile:
+    def __init__(self):
+        pass
+        # init a sensorData object here and save (append) all data in a json file
 
 
 def generate_formatted_timestamp():
@@ -342,9 +409,6 @@ def setup_GPIO(main_logger):
 
     # infrared motion detector
     GPIO.setup(24, GPIO.IN)
-
-    # DHT22 (humidity, temperature)
-    GPIO.setup(23, GPIO.IN)
 
     # Relais for 950nm LEDs
     GPIO.setup(25, GPIO.OUT)
