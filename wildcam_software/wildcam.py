@@ -190,7 +190,7 @@ class SensorData:
 
     def read_all(self):
         return {
-            'datetime' : DateTime.now(),
+            'datetime' : str(DateTime.now()),
             '950nm_led' : GPIO.input(25),
             '850nm_led' : GPIO.input(12),
             'brightness' : self.read_brightness(),
