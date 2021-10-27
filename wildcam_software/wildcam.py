@@ -195,14 +195,14 @@ class SensorData:
             '850nm_led' : GPIO.input(12),
             'brightness' : self.read_brightness(),
             'solar_panel' : GPIO.input(16),
-            'solar_current' : self.read_solar_current(),
-            'solar_voltage' : self.read_solar_voltage(),
-            'powerbank_current' : self.read_powerbank_current(),
-            'powerbank_voltage' : self.read_powerbank_voltage(),
-            'ext_bat_current' : self.read_ext_bat_current(),
-            'ext_bat_voltage' : self.read_ext_bat_voltage(),
-            'temperature' : self.read_temperature(),
-            'air_pressure' : self.read_pressure()
+            'solar_current' : round(self.read_solar_current()),
+            'solar_voltage' : round(self.read_solar_voltage(), 3),
+            'powerbank_current' : round(self.read_powerbank_current()),
+            'powerbank_voltage' : round(self.read_powerbank_voltage(), 3),
+            'ext_bat_current' : round(self.read_ext_bat_current()),
+            'ext_bat_voltage' : round(self.read_ext_bat_voltage(), 3),
+            'temperature' : round(self.read_temperature(), 1),
+            'air_pressure' : round(self.read_pressure())
         }
 
 
