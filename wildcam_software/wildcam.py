@@ -188,6 +188,23 @@ class SensorData:
     def read_ext_bat_current(self):
         return self.extBatDevice.current()
 
+    def read_all(self):
+        return {
+            'datetime' : DateTime.now(),
+            '950nm_led' : GPIO.input(25),
+            '850nm_led' : GPIO.input(12),
+            'brightness' : self.read_brightness(),
+            'solar_panel' : GPIO.input(16),
+            'solar_current' : self.read_solar_current(),
+            'solar_voltage' : self.read_solar_voltage(),
+            'powerbank_current' : self.read_powerbank_current(),
+            'powerbank_voltage' : self.read_powerbank_voltage(),
+            'ext_bat_current' : self.read_ext_bat_current(),
+            'ext_bat_voltage' : self.read_ext_bat_voltage(),
+            'temperature' : self.read_temperature(),
+            'air_pressure' : self.read_pressure()
+        }
+
 
 class SaveFile:
     def __init__(self):
@@ -424,7 +441,7 @@ def setup_GPIO(main_logger):
     # Relais for 950nm LEDs
     GPIO.setup(25, GPIO.OUT)
 
-    # Relais for 850bm LEDs
+    # Relais for 850nm LEDs
     GPIO.setup(12, GPIO.OUT)
 
     # Relais for Solar Panel
@@ -471,7 +488,7 @@ def main():
     else:
         main_logger.info('FOUND "files_upload" folder')
 
-    # setup_GPIO(main_logger)
+    setup_GPIO(main_logger)
 
     # motion_detector = MovementDetector(motion_logger)
     # motion_detector.start()
@@ -488,16 +505,17 @@ def main():
         #     time.sleep(1)
         sensors = SensorData(sensors_logger)
         while True:
-            print(f'brightness: {sensors.read_brightness()} lux')
-            print(f'temperature: {sensors.read_temperature()} °C')
-            # print(f'dht: {sensors.read_dht()}')
-            print(f'pressure: {sensors.read_pressure()} hPa')
-            print(f'solar voltage: {sensors.read_solar_voltage()} V')
-            print(f'solar current: {sensors.read_solar_current()} mA')
-            print(f'powerbank voltage: {sensors.read_powerbank_voltage()} V')
-            print(f'powerbank current: {sensors.read_powerbank_current()} mA')
-            print(f'ext battery voltage: {sensors.read_ext_bat_voltage()} V')
-            print(f'ext battery current: {sensors.read_ext_bat_current()} mA')
+            # 'print(f'brightness: {sensors.read_brightness()} lux')
+            # print(f'temperature: {sensors.read_temperature()} °C')
+            # # print(f'dht: {sensors.read_dht()}')
+            # print(f'pressure: {sensors.read_pressure()} hPa')
+            # print(f'solar voltage: {sensors.read_solar_voltage()} V')
+            # print(f'solar current: {sensors.read_solar_current()} mA')
+            # print(f'powerbank voltage: {sensors.read_powerbank_voltage()} V')
+            # print(f'powerbank current: {sensors.read_powerbank_current()} mA')
+            # print(f'ext battery voltage: {sensors.read_ext_bat_voltage()} V')
+            # print(f'ext battery current: {sensors.read_ext_bat_current()} mA')'
+            print(sensors.read_all())
             print("--------------------------------------------------------------")
             time.sleep(2)
     finally:
