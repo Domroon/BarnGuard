@@ -99,11 +99,6 @@ class Video:
         os.remove(str(BASE_PATH / f'{self.name}.h264'))
 
 
-class TransmitFile:
-    def __init__(self):
-        pass
-
-
 class MovementDetector:
     def __init__(self, logger):
         self.logger = logger
@@ -131,10 +126,11 @@ class MovementDetector:
 
 
 class SensorData:
-    def __init__(self):
+    def __init__(self, logger):
+        self.logger = logger
         self.tslDevice = tsl2591()
-        self.dhtDevice = adafruit_dht.DHT22(board.D23, use_pulseio=True)
-        self.bme280Device = bme280.load(smbus2.SMBus(1), 0x76)
+        self.dhtDevice = adafruit_dht.DHT22(board.D23, use_pulseio=False)
+        self.bme280Device = bme280.load_calibration_params(smbus2.SMBus(1), 0x76)
         self.solarDevice = INA219(SHUNT_OHMS, address=0x40)
         self.solarDevice.configure()
         self.powerbankDevice = INA219(SHUNT_OHMS, address=0x41)
@@ -147,15 +143,25 @@ class SensorData:
         brightness = self.tslDevice.get_current()
         return round(brightness["lux"], 3) # integer?
 
+    def read_dht(self):
+        # unit: °C
+        while True:
+            try:
+                temperature_c = self.dhtDevice.temperature
+                humidity = self.dhtDevice.humidity
+                return {'temperature:' : temperature_c, 'humidity' : humidity}
+            except RuntimeError as error:
+                self.logger.error(f'{error.args[0]}')
+                time.sleep(2)
+                continue
+            except Exception as error:
+                self.dhtDevice.exit()
+                raise error
+
     def read_temperature(self):
         # unit: °C
-        dht_temperature = self.dhtDevice.temperature
         bme280_data = bme280.sample(smbus2.SMBus(1), 0x76, self.bme280Device)
-        bme280_temperature = bme280_data.temperature
-        return (dht_temperature + bme280_temperature) / 2
-
-    def read_humidity(self):
-        return f'{self.dhtDevice.humidity}%'
+        return bme280_data.temperature
 
     def read_pressure(self):
         # unit: hPa
@@ -187,6 +193,11 @@ class SaveFile:
     def __init__(self):
         pass
         # init a sensorData object here and save (append) all data in a json file
+
+
+class TransmitFile:
+    def __init__(self):
+        pass
 
 
 def generate_formatted_timestamp():
@@ -447,6 +458,11 @@ def main():
     motion_logger.addHandler(console_handler)
     motion_logger.addHandler(file_handler)
 
+    sensors_logger = logging.getLogger("sensors")
+    sensors_logger.setLevel(logging.DEBUG)
+    sensors_logger.addHandler(console_handler)
+    sensors_logger.addHandler(file_handler)
+
     main_logger.info("START wildcam software")
 
     if 'files_upload' not in listdir():
@@ -455,21 +471,35 @@ def main():
     else:
         main_logger.info('FOUND "files_upload" folder')
 
-    setup_GPIO(main_logger)
+    # setup_GPIO(main_logger)
 
-    motion_detector = MovementDetector(motion_logger)
-    motion_detector.start()
+    # motion_detector = MovementDetector(motion_logger)
+    # motion_detector.start()
 
     try:
-        recording = False
+        # recording = False
+        # while True:
+        #     if motion_detector.active and not recording:
+        #         recording = True
+        #         video = Video(video_logger)
+        #         video.record()
+        #         del video
+        #         recording = False
+        #     time.sleep(1)
+        sensors = SensorData(sensors_logger)
         while True:
-            if motion_detector.active and not recording:
-                recording = True
-                video = Video(video_logger)
-                video.record()
-                del video
-                recording = False
-            time.sleep(1)
+            print(f'brightness: {sensors.read_brightness()} lux')
+            print(f'temperature: {sensors.read_temperature()} °C')
+            # print(f'dht: {sensors.read_dht()}')
+            print(f'pressure: {sensors.read_pressure()} hPa')
+            print(f'solar voltage: {sensors.read_solar_voltage()} V')
+            print(f'solar current: {sensors.read_solar_current()} mA')
+            print(f'powerbank voltage: {sensors.read_powerbank_voltage()} V')
+            print(f'powerbank current: {sensors.read_powerbank_current()} mA')
+            print(f'ext battery voltage: {sensors.read_ext_bat_voltage()} V')
+            print(f'ext battery current: {sensors.read_ext_bat_current()} mA')
+            print("--------------------------------------------------------------")
+            time.sleep(2)
     finally:
         GPIO.cleanup()
         main_logger.info("CLEAN all GPIO Pins")
