@@ -248,7 +248,7 @@ class Data:
         if len(json_data) >= 1:
             # get the last object
             object_num = len(json_data) - 1
-            return json_data[object_num]['datetime']
+            return json_data[object_num]
         else:
             self.logger.error('Can not read last data. File is empty.')
 
@@ -491,6 +491,15 @@ def setup_GPIO(main_logger):
     main_logger.info("CONFIGURE all GPIO IN and OUTs sucessfully")
 
 
+def is_brightness_low(data, threshold):
+    brightness = data.read_last_data()['brightness']
+
+    if(brightness <= threshold):
+        return True
+    else:
+        return False
+
+
 def main():
     # Configure Loggers
     console_handler = logging.StreamHandler()
@@ -517,12 +526,12 @@ def main():
     motion_logger.addHandler(file_handler)
 
     sensors_logger = logging.getLogger("sensors")
-    sensors_logger.setLevel(logging.DEBUG)
+    sensors_logger.setLevel(logging.INFO)
     sensors_logger.addHandler(console_handler)
     sensors_logger.addHandler(file_handler)
 
     data_logger = logging.getLogger('data_saver')
-    data_logger.setLevel(logging.DEBUG)
+    data_logger.setLevel(logging.INFO)
     data_logger.addHandler(console_handler)
     data_logger.addHandler(file_handler)
 
@@ -536,30 +545,37 @@ def main():
 
     setup_GPIO(main_logger)
 
-    # motion_detector = MovementDetector(motion_logger)
-    # motion_detector.start()
-
     try:
         data = Data(data_logger, sensors_logger)
         data.start()
+        motion_detector = MovementDetector(motion_logger)
+        motion_detector.start()
+
+        recording = False
         while True:
-            print(data.read_last_data())
-            print('------------------------------------')
-            time.sleep(5)
+            if motion_detector.active and not recording:
+                low_brightness = is_brightness_low(data, 5)
+                main_logger.debug(f'brightness is low: {low_brightness}')
+                if low_brightness:
+                    main_logger.debug('put the lights on')
+                    GPIO.output(25, True)
+                    GPIO.output(12, True)
+                recording = True
+                video = Video(video_logger)
+                video.record()
+                del video
+                recording = False
+                time.sleep(1)
+                if low_brightness:
+                    main.logger.debug('put the lights off')
+                    GPIO.output(25, False)
+                    GPIO.output(12, False)
+            time.sleep(1)
     finally:
         GPIO.cleanup()
         main_logger.info("CLEAN all GPIO Pins")
 
-    # recording = False
-        # while True:
-        #     if motion_detector.active and not recording:
-        #         recording = True
-        #         video = Video(video_logger)
-        #         video.record()
-        #         del video
-        #         recording = False
-        #     time.sleep(1)
+    # then implement solar loading
 
-    
 if __name__ == '__main__':
     main()
