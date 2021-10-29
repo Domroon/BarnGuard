@@ -567,7 +567,7 @@ def main():
                 recording = False
                 time.sleep(1)
                 if low_brightness:
-                    main.logger.debug('put the lights off')
+                    main_logger.debug('put the lights off')
                     GPIO.output(25, False)
                     GPIO.output(12, False)
             time.sleep(1)
