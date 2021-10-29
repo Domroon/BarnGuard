@@ -206,12 +206,51 @@ class SensorData:
         }
 
 
-class SaveFile:
-    def __init__(self):
-        pass
-        # init a sensorData object here and save (append) all data in a json file
+class Data:
+    def __init__(self, logger, sensors_logger):
+        self.logger = logger
+        self.sensors = SensorData(sensors_logger)
 
+    def start(self):
+        self._generate_json_file()
+        thread = threading.Thread(target=self._save_sensor_data)
+        thread.daemon = True
+        self.logger.info("START sensor data Thread")
+        thread.start()
 
+    def _generate_json_file(self):
+        if 'sensors_data.json' not in listdir():
+            self.logger.info('GENERATE json-file "sensor_data.json"')
+            with open('sensors_data.json', 'w+') as file:
+                file.write(json.dumps([]))
+        else:
+            self.logger.info('FOUND json-file "sensor_data.json"')
+
+    def _save_sensor_data(self):
+        while True:
+            with open('sensors_data.json', 'r') as file:
+                json_data = json.loads(file.read())
+
+            data_dict = self.sensors.read_all()
+            json_data.append(data_dict)
+
+            with open('test.json', 'w') as file:
+                file.write(json.dumps(json_data))
+
+            time.sleep(10)
+
+    def read_last_data(self):
+        with open('sensors_data.json', 'r') as file:
+            json_data = json.loads(file.read())
+
+        if len(json_data) >= 1:
+            # get the last object
+            object_num = len(json_data) - 1
+            return json_data[object_num]['datetime']
+        else:
+            self.logger.error('Can not read last data. File is empty.')
+
+        
 class TransmitFile:
     def __init__(self):
         pass
@@ -480,6 +519,11 @@ def main():
     sensors_logger.addHandler(console_handler)
     sensors_logger.addHandler(file_handler)
 
+    data_logger = logging.getLogger('data_saver')
+    data_logger.setLevel(logging.DEBUG)
+    data_logger.addHandler(console_handler)
+    data_logger.addHandler(file_handler)
+
     main_logger.info("START wildcam software")
 
     if 'files_upload' not in listdir():
@@ -494,7 +538,17 @@ def main():
     # motion_detector.start()
 
     try:
-        # recording = False
+        data = Data(data_logger, sensors_logger)
+        data.start()
+        while True:
+            print(data.read_last_data())
+            print('------------------------------------')
+            time.sleep(5)
+    finally:
+        GPIO.cleanup()
+        main_logger.info("CLEAN all GPIO Pins")
+
+    # recording = False
         # while True:
         #     if motion_detector.active and not recording:
         #         recording = True
@@ -503,24 +557,7 @@ def main():
         #         del video
         #         recording = False
         #     time.sleep(1)
-        sensors = SensorData(sensors_logger)
-        while True:
-            # 'print(f'brightness: {sensors.read_brightness()} lux')
-            # print(f'temperature: {sensors.read_temperature()} °C')
-            # # print(f'dht: {sensors.read_dht()}')
-            # print(f'pressure: {sensors.read_pressure()} hPa')
-            # print(f'solar voltage: {sensors.read_solar_voltage()} V')
-            # print(f'solar current: {sensors.read_solar_current()} mA')
-            # print(f'powerbank voltage: {sensors.read_powerbank_voltage()} V')
-            # print(f'powerbank current: {sensors.read_powerbank_current()} mA')
-            # print(f'ext battery voltage: {sensors.read_ext_bat_voltage()} V')
-            # print(f'ext battery current: {sensors.read_ext_bat_current()} mA')'
-            print(sensors.read_all())
-            print("--------------------------------------------------------------")
-            time.sleep(2)
-    finally:
-        GPIO.cleanup()
-        main_logger.info("CLEAN all GPIO Pins")
+        
     
 if __name__ == '__main__':
     main()
