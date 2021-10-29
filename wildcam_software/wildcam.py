@@ -189,6 +189,7 @@ class SensorData:
         return self.extBatDevice.current()
 
     def read_all(self):
+        self.logger.debug('READ all sensors')
         return {
             'datetime' : str(DateTime.now()),
             '950nm_led' : GPIO.input(25),
@@ -231,10 +232,11 @@ class Data:
             with open('sensors_data.json', 'r') as file:
                 json_data = json.loads(file.read())
 
+            self.logger.debug('GET all sensor data')
             data_dict = self.sensors.read_all()
             json_data.append(data_dict)
 
-            with open('test.json', 'w') as file:
+            with open('sensors_data.json', 'w') as file:
                 file.write(json.dumps(json_data))
 
             time.sleep(10)
@@ -557,7 +559,7 @@ def main():
         #         del video
         #         recording = False
         #     time.sleep(1)
-        
+
     
 if __name__ == '__main__':
     main()
