@@ -565,16 +565,18 @@ def main():
                 video.record()
                 del video
                 recording = False
-                time.sleep(1)
                 if low_brightness:
                     main_logger.debug('put the lights off')
                     GPIO.output(25, False)
                     GPIO.output(12, False)
+                time.sleep(1)
             time.sleep(1)
     finally:
         GPIO.cleanup()
         main_logger.info("CLEAN all GPIO Pins")
 
+    # fix "Detect Motion but no motion happen in real"
+    # fix "logger always show the output two times at console handler"
     # then implement solar loading
 
 if __name__ == '__main__':
