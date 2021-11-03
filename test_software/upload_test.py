@@ -1,7 +1,10 @@
 import requests
 import os
 from pathlib import Path
-from os import getcwd
+from os import getcwd, listdir
+from datetime import datetime as DateTime
+import json
+import time
 
 NETWORK_ADDRESS="domroon.de"
 BASE_PATH = Path(getcwd())
@@ -60,19 +63,58 @@ def upload_video_json(date, time, raw_video_name):
     # print(r.text)
 
 
-def generate_video_json(date, time, filename):
-    json_data = {
-        "date": date,
-        "thumbnail_photo" : f'{filename}.jpg',
-        "time" : time,
-        "videoname" : f'{filename}.mp4',
-    }
-    return json_data
+def generate_json_file(date, time, filename):
+    filename, file_type = filename.split('.')
+    if file_type == 'mp4':
+        json_data = {
+            "date": date,
+            "thumbnail_photo" : f'{filename}.jpg',
+            "time" : time,
+            "videoname" : f'{filename}.mp4',
+        }
+        return json_data
+    else:
+        return 'wrong file type'
+
+
+def generate_formatted_timestamp():
+    now = str(DateTime.now()).split(' ')
+
+    # Date
+    date_now = now[0]
+    formatted_date = format_date(date_now)
+
+    # Time
+    time_now = now[1]    
+    formatted_time = format_time(time_now)
+
+    return formatted_date, formatted_time
+
+
+def format_date(date_now):
+    date_items = date_now.split('-')
+    return f'{date_items[0]}-{date_items[1]}-{date_items[2]}'
+
+
+def format_time(time_now):
+    time_items = time_now.split(':')
+    return f"{time_items[0]}:{time_items[1]}"
 
 
 def main():
-    upload_video('ruehrwerk.jpg')
+    #upload_video('ruehrwerk.jpg')
+    # print(listdir('files_upload'))
+    while True: 
+        datetime = generate_formatted_timestamp()
+        print(generate_json_file(datetime[0], datetime[1], 'test.jpeg'))
+        time.sleep(1)
 
+# baue hier direkt FileTransmitter, welcher seine operationen in einem eigenen Thread ausführt! Falls eine Exception kommt, diese loggen und in 5s nochmal versuchen
+# (Denn es kann ja sein, dass ein video noch nicht zuende kopiert ist)
+
+# generiere json datei wenn der file-type mp4 ist (wenn nicht, dann erhöhe den zähler der gespeicherten liste von listdir() solange bis das listenende erreicht ist)
+# lade das entsprechende video und entsprechende bildatei hoch
+# wenn die antwort '200' ist, dann lade diese json-datei hoch, falls nicht -> beginne von vorne (listdir()- Abfrage)
 
 if __name__ == '__main__':
     main()
