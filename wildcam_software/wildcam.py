@@ -456,24 +456,21 @@ def main():
 
         recording = False
         while True:
-            # if motion_detector.active and not recording:
-            #     low_brightness = is_brightness_low(data, 5)
-            #     main_logger.debug(f'brightness is low: {low_brightness}')
-            #     if low_brightness:
-            #         main_logger.debug('put the lights on')
-            #         GPIO.output(25, True)
-            #         GPIO.output(12, True)
-            #     recording = True
-            #     video = Video(video_logger)
-            #     video.record()
-            #     del video
-            #     recording = False
-            #     if low_brightness:
-            #         main_logger.debug('put the lights off')
-            #         GPIO.output(25, False)
-            #         GPIO.output(12, False)
-            if motion_detector.detected:
-                print("Hier würde das Video aufgenommen werden")
+            if motion_detector.detected and not recording:
+                low_brightness = is_brightness_low(data, 5)
+                main_logger.debug(f'brightness is low: {low_brightness}')
+                if low_brightness:
+                    main_logger.debug('put the lights on')
+                    GPIO.output(25, True)
+                    GPIO.output(12, True)
+                video = Video(video_logger)
+                video.record()
+                del video
+                recording = False
+                if low_brightness:
+                    main_logger.debug('put the lights off')
+                    GPIO.output(25, False)
+                    GPIO.output(12, False)
                 motion_detector.detected = False
             time.sleep(0.5)
     finally:
