@@ -37,3 +37,6 @@ test.json
 #logs
 flask_server.log
 wildcam.log
+upload_test.log
+wildcam_software/wildcam.log
+
