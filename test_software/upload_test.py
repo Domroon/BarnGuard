@@ -8,9 +8,13 @@ import time
 import logging
 import threading
 
+
 NETWORK_ADDRESS="domroon.de"
+UPLOAD_URL = f'http://{NETWORK_ADDRESS}/upload'
+JSON_URL = f'http://{NETWORK_ADDRESS}/api/videos'
 BASE_PATH = Path(getcwd())
 FILES_UPLOAD = BASE_PATH / "files_upload"
+
 
 def upload_video(filename):
     try:
@@ -106,7 +110,7 @@ def format_time(time_now):
 class FileTransmitter:
     def __init__(self, logger):
         self.logger = logger
-        self.json_obj = None
+        self.json_data = None
 
     def start(self):
         thread = threading.Thread(target=self._transmit)
@@ -116,21 +120,32 @@ class FileTransmitter:
 
     def _transmit(self):
         while True:
-            #self.logger.info('Hello')
+            picture_resp = None
+            video_resp = None
             filename = self._search_video_filename()
             if filename:
                 self.logger.info(f'FOUND Video "{filename}"')
                 self.logger.info('GENERATE json-object')
-                self.json_obj = self._generate_json(filename)
+                self.json_data = self._generate_json(filename)
                 time.sleep(2)
-                self.logger.info(f'UPLOAD Thumbnail Picture "{filename}.jpg"')
-                picture_resp = self._upload_picture()
-                self.logger.info(f'UPLOAD Video "{filename}.mp4"')
-                video_resp = self._upload_video()
-                if picture_resp == 200 and video_resp == 200:
+                try:
+                    self.logger.info(f'UPLOAD Thumbnail Picture "{filename}.jpg"')
+                    picture_resp = self._upload_media(f'{filename}.jpg')
+                    self.logger.info(f'UPLOAD Video "{filename}.mp4"')
+                    video_resp = self._upload_media(f'{filename}.mp4')
+                except requests.exceptions.ConnectionError as error:
+                    self.logger.error(f'{error}. Try again in 10s.')
+                if picture_resp.status_code == 200 and video_resp.status_code == 200:
+                    self.logger.info('DELETE uploaded media files')
+                    os.remove(str(FILES_UPLOAD / f'{filename}.mp4'))
+                    os.remove(str(FILES_UPLOAD / f'{filename}.jpg'))
                     self.logger.info(f'UPLOAD JSON-File')
+                    json_resp = self._upload_json(json.dumps(self.json_data))
+                    if json_resp.status_code != 201:
+                        json_resp_text = json.loads(json_resp.text)
+                        self.logger.error(f'{json_resp.status_code} - {json_resp_text["title"]} - {json_resp_text["detail"]}')
                 else:
-                    self.logger.error(f'Video Upload or Picture Upload has an error. JSON-Data will not uploaded.')
+                    self.logger.error(f'Video Response: {video_resp}; Picture Response: {picture_resp}. JSON-Data will not uploaded.')
             time.sleep(10)
 
     def _search_video_filename(self):
@@ -138,13 +153,12 @@ class FileTransmitter:
         file_type = None
         i = 0
         while True:
+            if len(dirlist) == i:
+                return None
             filename, file_type = dirlist[i].split('.')
-            
             if file_type == 'mp4':
                 return filename
-
-            if len(dirlist) > i:
-                return None
+            i = i + 1
 
     def _generate_json(self, filename):
         now = str(DateTime.now()).split(' ')
@@ -171,14 +185,15 @@ class FileTransmitter:
         time_items = time_now.split(':')
         return f"{time_items[0]}:{time_items[1]}"
 
-    def _upload_video(self):
-        pass
+    def _upload_media(self, filename):
+        with open(str(FILES_UPLOAD / filename ), 'rb') as file:
+            files = {'file' : file}
+            r = requests.post(UPLOAD_URL, files=files, headers={'Authorization' : 'gAAAAABhMhDkkS0ZWFKyrhFBnDxJp5r_cjV-ZXFYh4adcoCMRSwo_qcnfsqadt4nwD3XXBlYXNHNBJWyEB7FeH6qR_FVnxFa-NGLI2HPGBYCnY2avAdd5UJ1fBOR5YoVVR5O7iXE9rpnZKRWdkUAsyQ5zuQA_XquSukJvwziExE6a5TW4NTw3xQ='})   
+        return r
 
-    def _upload_picture(self):
-        pass
-
-    def _upload_json(self):
-        pass
+    def _upload_json(self, json_data):
+        r = requests.post(JSON_URL, data=json_data, headers={'Content-Type': 'application/json', 'Authorization' : 'gAAAAABhMhDkkS0ZWFKyrhFBnDxJp5r_cjV-ZXFYh4adcoCMRSwo_qcnfsqadt4nwD3XXBlYXNHNBJWyEB7FeH6qR_FVnxFa-NGLI2HPGBYCnY2avAdd5UJ1fBOR5YoVVR5O7iXE9rpnZKRWdkUAsyQ5zuQA_XquSukJvwziExE6a5TW4NTw3xQ='})
+        return r
 
 
 def main():
@@ -203,16 +218,8 @@ def main():
     transmitter.start()
 
     while True: 
-        datetime = generate_formatted_timestamp()
-        print(generate_json_file(datetime[0], datetime[1], 'test.jpeg'))
         time.sleep(5)
 
-# baue hier direkt FileTransmitter, welcher seine operationen in einem eigenen Thread ausführt! Falls eine Exception kommt, diese loggen und in 5s nochmal versuchen
-# (Denn es kann ja sein, dass ein video noch nicht zuende kopiert ist)
-
-# generiere json datei wenn der file-type mp4 ist (wenn nicht, dann erhöhe den zähler der gespeicherten liste von listdir() solange bis das listenende erreicht ist)
-# lade das entsprechende video und entsprechende bildatei hoch
-# wenn die antwort '200' ist, dann lade diese json-datei hoch, falls nicht -> beginne von vorne (listdir()- Abfrage)
 
 if __name__ == '__main__':
     main()
