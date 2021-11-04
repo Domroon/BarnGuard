@@ -41,6 +41,8 @@ BASE_PATH = Path(getcwd())
 FILES_UPLOAD = BASE_PATH / "files_upload"
 SHUNT_OHMS = 0.1
 MAX_EXPECTED_AMPS = 0.2
+MIN_MOVEMENT = 3
+MOVE_PERIOD = 10 # seconds
 
 
 class Video:
@@ -101,25 +103,51 @@ class Video:
 class MovementDetector:
     def __init__(self, logger):
         self.logger = logger
-        self.movement = False
-        self.active = False
-        self.thread = None
+        self._movement = False
+        self._active = False
+        self._sensor_thread = None
+        self._movement_thread = None
+        self._movement_counter = 0
+        self._min_movements = MIN_MOVEMENT
+        self._move_period = MOVE_PERIOD
+        self.detected = False
 
     def start(self):
-        self.thread = threading.Thread(target=self._detect)
-        self.thread.daemon=True
+        self._sensor_thread = threading.Thread(target=self._detect)
+        self._sensor_thread.daemon=True
+        self._movement_thread = threading.Thread(target=self._detect_move)
+        self._movement_thread.daemon=True
         self.logger.info("START motion Thread")
-        self.thread.start()
+        self._sensor_thread.start()
+        self._movement_thread.start()
+    
+    def _detect_move(self):
+        while True:
+            start_time = round(time.perf_counter())
+            self._movement_counter = 0
+            while True:
+                end_time = round(time.perf_counter()) - start_time
+                if end_time >= self._move_period:
+                    self.logger.debug('reached move_period time - reset mov_counter and time')
+                    break
+                if self._active:
+                    self._movement_counter = self._movement_counter + 1
+                    self.logger.debug(f'Movement Counter: {self._movement_counter}')
+                if self._movement_counter >= self._min_movements:
+                    self.logger.info('DETECT Movement')
+                    self.detected = True
+                    break
+                time.sleep(1)
+            time.sleep(1)
 
     def _detect(self):
         while True:
-            self.logger.debug('movement detection is running')
-            self.movement = GPIO.input(24)
-            if self.movement and self.active == False:
-                self.active = True
-                self.logger.info("DETECTED motion")
-            elif self.movement == False and self.active == True:
-                self.active = False
+            self._movement = GPIO.input(24)
+            if self._movement and self._active == False:
+                self._active = True
+                time.sleep(1.5)
+            elif self._movement == False and self._active == True:
+                self._active = False
 
             time.sleep(0.1)
 
@@ -389,7 +417,7 @@ def main():
     video_logger.addHandler(file_handler)
 
     motion_logger = logging.getLogger("motion_detector")
-    motion_logger.setLevel(logging.INFO)
+    motion_logger.setLevel(logging.DEBUG)
     motion_logger.addHandler(console_handler)
     motion_logger.addHandler(file_handler)
 
@@ -428,24 +456,26 @@ def main():
 
         recording = False
         while True:
-            if motion_detector.active and not recording:
-                low_brightness = is_brightness_low(data, 5)
-                main_logger.debug(f'brightness is low: {low_brightness}')
-                if low_brightness:
-                    main_logger.debug('put the lights on')
-                    GPIO.output(25, True)
-                    GPIO.output(12, True)
-                recording = True
-                video = Video(video_logger)
-                video.record()
-                del video
-                recording = False
-                if low_brightness:
-                    main_logger.debug('put the lights off')
-                    GPIO.output(25, False)
-                    GPIO.output(12, False)
-                time.sleep(1)
-            time.sleep(1)
+            # if motion_detector.active and not recording:
+            #     low_brightness = is_brightness_low(data, 5)
+            #     main_logger.debug(f'brightness is low: {low_brightness}')
+            #     if low_brightness:
+            #         main_logger.debug('put the lights on')
+            #         GPIO.output(25, True)
+            #         GPIO.output(12, True)
+            #     recording = True
+            #     video = Video(video_logger)
+            #     video.record()
+            #     del video
+            #     recording = False
+            #     if low_brightness:
+            #         main_logger.debug('put the lights off')
+            #         GPIO.output(25, False)
+            #         GPIO.output(12, False)
+            if motion_detector.detected:
+                print("Hier würde das Video aufgenommen werden")
+                motion_detector.detected = False
+            time.sleep(0.5)
     finally:
         GPIO.cleanup()
         main_logger.info("CLEAN all GPIO Pins")
