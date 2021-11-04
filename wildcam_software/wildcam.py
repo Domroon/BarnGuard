@@ -20,11 +20,10 @@ from moviepy.editor import VideoFileClip
 from PIL import Image
 from python_tsl2591 import tsl2591
 import board
-import adafruit_dht
+# import adafruit_dht
 import smbus2
 import bme280
 from ina219 import INA219
-from ina219 import DeviceRangeError
 
 try:
     import RPi.GPIO as GPIO
@@ -156,13 +155,13 @@ class SensorData:
     def __init__(self, logger):
         self.logger = logger
         self.tslDevice = tsl2591()
-        self.dhtDevice = adafruit_dht.DHT22(board.D23, use_pulseio=False)
+        #self.dhtDevice = adafruit_dht.DHT22(board.D23, use_pulseio=False)
         self.bme280Device = bme280.load_calibration_params(smbus2.SMBus(1), 0x76)
-        self.solarDevice = INA219(SHUNT_OHMS, address=0x40)
+        self.solarDevice = INA219(SHUNT_OHMS, address=0x40, log_level=logging.CRITICAL)
         self.solarDevice.configure()
-        self.powerbankDevice = INA219(SHUNT_OHMS, address=0x41)
+        self.powerbankDevice = INA219(SHUNT_OHMS, address=0x41, log_level=logging.CRITICAL)
         self.powerbankDevice.configure()
-        self.extBatDevice = INA219(SHUNT_OHMS, address=0x44)
+        self.extBatDevice = INA219(SHUNT_OHMS, address=0x44, log_level=logging.CRITICAL)
         self.extBatDevice.configure()
 
     def read_brightness(self):
@@ -368,6 +367,7 @@ class FileTransmitter:
         r = requests.post(JSON_URL, data=json_data, headers={'Content-Type': 'application/json', 'Authorization' : 'gAAAAABhMhDkkS0ZWFKyrhFBnDxJp5r_cjV-ZXFYh4adcoCMRSwo_qcnfsqadt4nwD3XXBlYXNHNBJWyEB7FeH6qR_FVnxFa-NGLI2HPGBYCnY2avAdd5UJ1fBOR5YoVVR5O7iXE9rpnZKRWdkUAsyQ5zuQA_XquSukJvwziExE6a5TW4NTw3xQ='})
         return r
 
+
 def setup_GPIO(main_logger):
 
     GPIO.setmode(GPIO.BCM)
@@ -407,17 +407,17 @@ def main():
     file_handler.setFormatter(formatter)
 
     main_logger = logging.getLogger("main")
-    main_logger.setLevel(logging.DEBUG)
+    main_logger.setLevel(logging.INFO)
     main_logger.addHandler(console_handler)
     main_logger.addHandler(file_handler)
 
     video_logger = logging.getLogger("video")
-    video_logger.setLevel(logging.DEBUG)
+    video_logger.setLevel(logging.INFO)
     video_logger.addHandler(console_handler)
     video_logger.addHandler(file_handler)
 
     motion_logger = logging.getLogger("motion_detector")
-    motion_logger.setLevel(logging.DEBUG)
+    motion_logger.setLevel(logging.INFO)
     motion_logger.addHandler(console_handler)
     motion_logger.addHandler(file_handler)
 
@@ -432,7 +432,7 @@ def main():
     data_logger.addHandler(file_handler)
 
     transmit_logger = logging.getLogger('FileTransmitter')
-    transmit_logger.setLevel(logging.DEBUG)
+    transmit_logger.setLevel(logging.INFO)
     transmit_logger.addHandler(console_handler)
     transmit_logger.addHandler(file_handler)
 
