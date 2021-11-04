@@ -320,6 +320,11 @@ def main():
     data_logger.addHandler(console_handler)
     data_logger.addHandler(file_handler)
 
+    transmit_logger = logging.getLogger('FileTransmitter')
+    transmit_logger.setLevel(logging.DEBUG)
+    transmit_logger.addHandler(console_handler)
+    transmit_logger.addHandler(file_handler)
+
     main_logger.info("START wildcam software")
 
     if 'files_upload' not in listdir():
