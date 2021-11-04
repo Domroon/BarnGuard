@@ -34,12 +34,11 @@ except ModuleNotFoundError as error:
     sys.exit()
 
 
+NETWORK_ADDRESS="domroon.de" # development: localhost:5000
+UPLOAD_URL = f'http://{NETWORK_ADDRESS}/upload'
+JSON_URL = f'http://{NETWORK_ADDRESS}/api/videos'
 BASE_PATH = Path(getcwd())
 FILES_UPLOAD = BASE_PATH / "files_upload"
-
-# development "localhost:5000"
-# deploy "domroon.de"
-NETWORK_ADDRESS="domroon.de"
 SHUNT_OHMS = 0.1
 MAX_EXPECTED_AMPS = 0.2
 
