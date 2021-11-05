@@ -317,7 +317,7 @@ class FileTransmitter:
                         json_resp_text = json.loads(json_resp.text)
                         self.logger.error(f'{json_resp.status_code} - {json_resp_text["title"]} - {json_resp_text["detail"]}')
                     else:
-                        self.logger.info('UPLOAD successfully')
+                        self.logger.info(f'UPLOAD for "{filename}" successfully')
                 else:
                     self.logger.error(f'Video Response: {video_resp}; Picture Response: {picture_resp}. JSON-Data will not uploaded.')
                 
