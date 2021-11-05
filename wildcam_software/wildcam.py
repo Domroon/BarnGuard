@@ -157,11 +157,11 @@ class SensorData:
         self.tslDevice = tsl2591()
         #self.dhtDevice = adafruit_dht.DHT22(board.D23, use_pulseio=False)
         self.bme280Device = bme280.load_calibration_params(smbus2.SMBus(1), 0x76)
-        self.solarDevice = INA219(SHUNT_OHMS, address=0x40, log_level=logging.CRITICAL)
+        self.solarDevice = INA219(SHUNT_OHMS, address=0x40)
         self.solarDevice.configure()
-        self.powerbankDevice = INA219(SHUNT_OHMS, address=0x41, log_level=logging.CRITICAL)
+        self.powerbankDevice = INA219(SHUNT_OHMS, address=0x41)
         self.powerbankDevice.configure()
-        self.extBatDevice = INA219(SHUNT_OHMS, address=0x44, log_level=logging.CRITICAL)
+        self.extBatDevice = INA219(SHUNT_OHMS, address=0x44)
         self.extBatDevice.configure()
 
     def read_brightness(self):
