@@ -73,28 +73,28 @@ class Video:
             self.logger.info(f'CAPTURING video "{self.name}"')
             camera.wait_recording(self.duration)
             camera.stop_recording()
-        self.logger.info(f'CAPTURED video "{self.name}"')
+        self.logger.debug(f'CAPTURED video "{self.name}"')
         self._convert()
         self._generate_thumbnail()
         self._move_thumbnailfile()
         self._move_videofile()
 
     def _move_videofile(self):
-        self.logger.info(f'MOVE "{self.name}"\nfrom {BASE_PATH}\nto {FILES_UPLOAD}')
+        self.logger.debug(f'MOVE "{self.name}"\nfrom {BASE_PATH}\nto {FILES_UPLOAD}')
         shutil.move(str(BASE_PATH / f'{self.name}.mp4'), str(FILES_UPLOAD / f'{self.name}.mp4'))
 
     def _generate_thumbnail(self):
-        self.logger.info(f'CREATE thumbnail for video "{self.name}"')
+        self.logger.debug(f'CREATE thumbnail for video "{self.name}"')
         with VideoFileClip((str(BASE_PATH / f'{self.name}.mp4'))) as videofile:
             frame = videofile.get_frame(0)
         self.thumbnail = Image.fromarray(frame)
 
     def _move_thumbnailfile(self):
         self.thumbnail.save(str(FILES_UPLOAD / f'{self.name}.jpg'))
-        self.logger.info(f'SAVED Thumbnail {self.name}.jpg at: {FILES_UPLOAD}')
+        self.logger.debug(f'SAVED Thumbnail {self.name}.jpg at: {FILES_UPLOAD}')
 
     def _convert(self):
-        self.logger.info(f'CONVERT "{self.name}" from "h264" to "mp4"')
+        self.logger.debug(f'CONVERT "{self.name}" from "h264" to "mp4"')
         subprocess.run(["MP4Box", "-add", f'{self.name}.h264', f'{self.name}.mp4'])
         os.remove(str(BASE_PATH / f'{self.name}.h264'))
 
@@ -296,28 +296,31 @@ class FileTransmitter:
             video_resp = None
             filename = self._search_video_filename()
             if filename:
-                self.logger.info(f'FOUND Video "{filename}"')
-                self.logger.info('GENERATE json-object')
+                self.logger.debug(f'FOUND Video "{filename}"')
+                self.logger.debug('GENERATE json-object')
                 self.json_data = self._generate_json(filename)
                 time.sleep(2)
                 try:
-                    self.logger.info(f'UPLOAD Thumbnail Picture "{filename}.jpg"')
+                    self.logger.debug(f'UPLOAD Thumbnail Picture "{filename}.jpg"')
                     picture_resp = self._upload_media(f'{filename}.jpg')
-                    self.logger.info(f'UPLOAD Video "{filename}.mp4"')
+                    self.logger.debug(f'UPLOAD Video "{filename}.mp4"')
                     video_resp = self._upload_media(f'{filename}.mp4')
                 except requests.exceptions.ConnectionError as error:
                     self.logger.error(f'{error}. Try again in 10s.')
                 if picture_resp.status_code == 200 and video_resp.status_code == 200:
-                    self.logger.info('DELETE uploaded media files')
+                    self.logger.debug('DELETE uploaded media files')
                     os.remove(str(FILES_UPLOAD / f'{filename}.mp4'))
                     os.remove(str(FILES_UPLOAD / f'{filename}.jpg'))
-                    self.logger.info(f'UPLOAD JSON-File')
+                    self.logger.debug(f'UPLOAD JSON-File')
                     json_resp = self._upload_json(json.dumps(self.json_data))
                     if json_resp.status_code != 201:
                         json_resp_text = json.loads(json_resp.text)
                         self.logger.error(f'{json_resp.status_code} - {json_resp_text["title"]} - {json_resp_text["detail"]}')
+                    else:
+                        self.logger.info('UPLOAD successfully')
                 else:
                     self.logger.error(f'Video Response: {video_resp}; Picture Response: {picture_resp}. JSON-Data will not uploaded.')
+                
             time.sleep(10)
 
     def _search_video_filename(self):
@@ -406,27 +409,27 @@ def main():
     console_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
 
-    main_logger = logging.getLogger("main")
+    main_logger = logging.getLogger("Main")
     main_logger.setLevel(logging.INFO)
     main_logger.addHandler(console_handler)
     main_logger.addHandler(file_handler)
 
-    video_logger = logging.getLogger("video")
+    video_logger = logging.getLogger("Video")
     video_logger.setLevel(logging.INFO)
     video_logger.addHandler(console_handler)
     video_logger.addHandler(file_handler)
 
-    motion_logger = logging.getLogger("motion_detector")
+    motion_logger = logging.getLogger("MovementDetector")
     motion_logger.setLevel(logging.INFO)
     motion_logger.addHandler(console_handler)
     motion_logger.addHandler(file_handler)
 
-    sensors_logger = logging.getLogger("sensors")
+    sensors_logger = logging.getLogger("SensorData")
     sensors_logger.setLevel(logging.INFO)
     sensors_logger.addHandler(console_handler)
     sensors_logger.addHandler(file_handler)
 
-    data_logger = logging.getLogger('data_saver')
+    data_logger = logging.getLogger('Data')
     data_logger.setLevel(logging.INFO)
     data_logger.addHandler(console_handler)
     data_logger.addHandler(file_handler)
@@ -458,9 +461,9 @@ def main():
         while True:
             if motion_detector.detected and not recording:
                 low_brightness = is_brightness_low(data, 5)
-                main_logger.debug(f'brightness is low: {low_brightness}')
+                main_logger.debug(f'brightness: {low_brightness}')
                 if low_brightness:
-                    main_logger.debug('put the lights on')
+                    main_logger.info('ON LED Panel')
                     GPIO.output(25, True)
                     GPIO.output(12, True)
                 video = Video(video_logger)
@@ -468,7 +471,7 @@ def main():
                 del video
                 recording = False
                 if low_brightness:
-                    main_logger.debug('put the lights off')
+                    main_logger.info('OFF LED Panel')
                     GPIO.output(25, False)
                     GPIO.output(12, False)
                 motion_detector.detected = False
