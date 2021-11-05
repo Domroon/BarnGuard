@@ -20,10 +20,8 @@ from moviepy.editor import VideoFileClip
 from PIL import Image
 from python_tsl2591 import tsl2591
 import board
-# import adafruit_dht
 import smbus2
 import bme280
-from ina219 import INA219
 
 try:
     import RPi.GPIO as GPIO
@@ -31,6 +29,8 @@ try:
 except ModuleNotFoundError as error:
     print(f'{error}\nPlease run the Program on a RaspberryPi')
     sys.exit()
+
+from ina219 import INA219
 
 
 NETWORK_ADDRESS="domroon.de" # development: localhost:5000
@@ -477,7 +477,7 @@ def main():
         GPIO.cleanup()
         main_logger.info("CLEAN all GPIO Pins")
 
-    # fix "logger always show the output two times at console handler"
+    # fix "logger always show the output two times at console handler" !!IMPORT INA219 by your own and correct the logging issue!!
     # then implement solar loading
 
 if __name__ == '__main__':
