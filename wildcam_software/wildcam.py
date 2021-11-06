@@ -15,6 +15,7 @@ import sys
 import time
 import subprocess
 import threading
+import traceback
 
 from moviepy.editor import VideoFileClip
 from PIL import Image
@@ -459,29 +460,34 @@ def main():
 
         recording = False
         while True:
-            if motion_detector.detected and not recording:
-                low_brightness = is_brightness_low(data, 5)
-                main_logger.debug(f'brightness: {low_brightness}')
-                if low_brightness:
-                    main_logger.info('ON LED Panel')
-                    GPIO.output(25, True)
-                    GPIO.output(12, True)
-                video = Video(video_logger)
-                video.record()
-                del video
-                recording = False
-                if low_brightness:
-                    main_logger.info('OFF LED Panel')
-                    GPIO.output(25, False)
-                    GPIO.output(12, False)
-                motion_detector.detected = False
-            time.sleep(0.5)
+            try:
+                if motion_detector.detected and not recording:
+                    low_brightness = is_brightness_low(data, 5)
+                    main_logger.debug(f'brightness: {low_brightness}')
+                    if low_brightness:
+                        main_logger.info('ON LED Panel')
+                        GPIO.output(25, True)
+                        GPIO.output(12, True)
+                    video = Video(video_logger)
+                    video.record()
+                    del video
+                    recording = False
+                    if low_brightness:
+                        main_logger.info('OFF LED Panel')
+                        GPIO.output(25, False)
+                        GPIO.output(12, False)
+                    motion_detector.detected = False
+                time.sleep(0.5)
+            except KeyboardInterrupt:
+                raise
+            except:
+                tb = sys.exc_info()[2]
+                error = traceback.extract_tb(tb)
+                main_logger.error(str(error))
     finally:
         GPIO.cleanup()
         main_logger.info("CLEAN all GPIO Pins")
 
-    # fix "logger always show the output two times at console handler" !!IMPORT INA219 by your own and correct the logging issue!!
-    # then implement solar loading
-
+    
 if __name__ == '__main__':
     main()
