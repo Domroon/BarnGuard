@@ -4,6 +4,11 @@ from models import Video, VideoSchema
 from config import db
 from sqlalchemy import exc
 import security
+from os import remove
+
+
+MEDIA_PATH = '/root/barn-guard-website/backend/media'
+
 
 def get_timestamp():
     return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
@@ -98,9 +103,13 @@ def delete(videoname):
     """
     video = Video.query.filter_by(videoname=videoname).first()
 
+    name, file_type = videoname.split('.')
+
     if video:
         db.session.delete(video)
         db.session.commit()
+        remove(f'{MEDIA_PATH}/{name}.mp4')
+        remove(f'{MEDIA_PATH}/{name}.jpg')
         return make_response(f"{videoname} successfully deleted")  
     else:
         # Otherwise, nope, video to delete not found
