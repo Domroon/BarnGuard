@@ -144,6 +144,7 @@ class MovementDetector:
                 tb = sys.exc_info()[2]
                 error = traceback.extract_tb(tb)
                 print(str(error.format()))
+                raise
 
     def _detect(self):
         while True:
@@ -277,6 +278,7 @@ class Data:
                 tb = sys.exc_info()[2]
                 error = traceback.extract_tb(tb)
                 print(str(error.format()))
+                raise
 
     def read_last_data(self):
         with open('sensors_data.json', 'r') as file:
