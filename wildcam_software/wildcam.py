@@ -123,22 +123,27 @@ class MovementDetector:
     
     def _detect_move(self):
         while True:
-            start_time = round(time.perf_counter())
-            self._movement_counter = 0
-            while True:
-                end_time = round(time.perf_counter()) - start_time
-                if end_time >= self._move_period:
-                    self.logger.debug('reached move_period time - reset mov_counter and time')
-                    break
-                if self._active:
-                    self._movement_counter = self._movement_counter + 1
-                    self.logger.debug(f'Movement Counter: {self._movement_counter}')
-                if self._movement_counter >= self._min_movements:
-                    self.logger.info('DETECT Movement')
-                    self.detected = True
-                    break
+            try:
+                start_time = round(time.perf_counter())
+                self._movement_counter = 0
+                while True:
+                    end_time = round(time.perf_counter()) - start_time
+                    if end_time >= self._move_period:
+                        self.logger.debug('reached move_period time - reset mov_counter and time')
+                        break
+                    if self._active:
+                        self._movement_counter = self._movement_counter + 1
+                        self.logger.debug(f'Movement Counter: {self._movement_counter}')
+                    if self._movement_counter >= self._min_movements:
+                        self.logger.info('DETECT Movement')
+                        self.detected = True
+                        break
+                    time.sleep(1)
                 time.sleep(1)
-            time.sleep(1)
+            except:
+                tb = sys.exc_info()[2]
+                error = traceback.extract_tb(tb)
+                print(str(error.format()))
 
     def _detect(self):
         while True:
@@ -256,17 +261,22 @@ class Data:
 
     def _save_sensor_data(self):
         while True:
-            with open('sensors_data.json', 'r') as file:
-                json_data = json.loads(file.read())
+            try:
+                with open('sensors_data.json', 'r') as file:
+                    json_data = json.loads(file.read())
 
-            self.logger.debug('GET all sensor data')
-            data_dict = self.sensors.read_all()
-            json_data.append(data_dict)
+                self.logger.debug('GET all sensor data')
+                data_dict = self.sensors.read_all()
+                json_data.append(data_dict)
 
-            with open('sensors_data.json', 'w') as file:
-                file.write(json.dumps(json_data))
+                with open('sensors_data.json', 'w') as file:
+                    file.write(json.dumps(json_data))
 
-            time.sleep(10)
+                time.sleep(10)
+            except:
+                tb = sys.exc_info()[2]
+                error = traceback.extract_tb(tb)
+                print(str(error.format()))
 
     def read_last_data(self):
         with open('sensors_data.json', 'r') as file:
@@ -484,6 +494,7 @@ def main():
                 tb = sys.exc_info()[2]
                 error = traceback.extract_tb(tb)
                 main_logger.error(str(error))
+                raise
     finally:
         GPIO.cleanup()
         main_logger.info("CLEAN all GPIO Pins")
