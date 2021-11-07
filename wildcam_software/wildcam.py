@@ -144,7 +144,7 @@ class MovementDetector:
                 tb = sys.exc_info()[2]
                 error = traceback.extract_tb(tb)
                 print(str(error.format()))
-                sys.exit()
+                raise
 
     def _detect(self):
         while True:
@@ -277,7 +277,7 @@ class Data:
                 tb = sys.exc_info()[2]
                 error = traceback.extract_tb(tb)
                 self.logger.error(str(error.format()))
-                sys.exit()
+                raise
 
     def read_last_data(self):
         with open('sensors_data.json', 'r') as file:
@@ -351,7 +351,7 @@ class FileTransmitter:
                 tb = sys.exc_info()[2]
                 error = traceback.extract_tb(tb)
                 self.logger.error(str(error.format()))
-                sys.exit()
+                raise
 
     def _generate_json(self, filename):
         now = str(DateTime.now()).split(' ')
