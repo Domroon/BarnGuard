@@ -277,7 +277,7 @@ class Data:
             except:
                 tb = sys.exc_info()[2]
                 error = traceback.extract_tb(tb)
-                print(str(error.format()))
+                self.logger.error(str(error.format()))
                 raise
 
     def read_last_data(self):
@@ -341,12 +341,18 @@ class FileTransmitter:
         file_type = None
         i = 0
         while True:
-            if len(dirlist) == i:
-                return None
-            filename, file_type = dirlist[i].split('.')
-            if file_type == 'mp4':
-                return filename
-            i = i + 1
+            try:
+                if len(dirlist) == i:
+                    return None
+                filename, file_type = dirlist[i].split('.')
+                if file_type == 'mp4':
+                    return filename
+                i = i + 1
+            except:
+                tb = sys.exc_info()[2]
+                error = traceback.extract_tb(tb)
+                self.logger.error(str(error.format()))
+                raise
 
     def _generate_json(self, filename):
         now = str(DateTime.now()).split(' ')
