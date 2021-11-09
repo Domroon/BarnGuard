@@ -141,19 +141,19 @@ class MovementDetector:
                     time.sleep(1)
                 time.sleep(1)
             except:
-                tb = sys.exc_info()[2]
-                error = traceback.extract_tb(tb)
-                print(str(error.format()))
-                raise
+                save_error(self.logger)
 
     def _detect(self):
         while True:
-            self._movement = GPIO.input(24)
-            if self._movement and self._active == False:
-                self._active = True
-                time.sleep(1.5)
-            elif self._movement == False and self._active == True:
-                self._active = False
+            try:
+                self._movement = GPIO.input(24)
+                if self._movement and self._active == False:
+                    self._active = True
+                    time.sleep(1.5)
+                elif self._movement == False and self._active == True:
+                    self._active = False
+            except:
+                save_error(self.logger)
 
             time.sleep(0.1)
 
@@ -274,10 +274,7 @@ class Data:
 
                 time.sleep(10)
             except:
-                tb = sys.exc_info()[2]
-                error = traceback.extract_tb(tb)
-                self.logger.error(str(error.format()))
-                raise
+                save_error(self.logger)
 
     def read_last_data(self):
         with open('sensors_data.json', 'r') as file:
@@ -319,19 +316,25 @@ class FileTransmitter:
                     video_resp = self._upload_media(f'{filename}.mp4')
                 except requests.exceptions.ConnectionError as error:
                     self.logger.error(f'{error}. Try again in 10s.')
-                if picture_resp.status_code == 200 and video_resp.status_code == 200:
-                    self.logger.debug('DELETE uploaded media files')
-                    os.remove(str(FILES_UPLOAD / f'{filename}.mp4'))
-                    os.remove(str(FILES_UPLOAD / f'{filename}.jpg'))
-                    self.logger.debug(f'UPLOAD JSON-File')
-                    json_resp = self._upload_json(json.dumps(self.json_data))
-                    if json_resp.status_code != 201:
-                        json_resp_text = json.loads(json_resp.text)
-                        self.logger.error(f'{json_resp.status_code} - {json_resp_text["title"]} - {json_resp_text["detail"]}')
+                except:
+                    save_error(self.logger)
+
+                try:
+                    if picture_resp.status_code == 200 and video_resp.status_code == 200:
+                        self.logger.debug('DELETE uploaded media files')
+                        os.remove(str(FILES_UPLOAD / f'{filename}.mp4'))
+                        os.remove(str(FILES_UPLOAD / f'{filename}.jpg'))
+                        self.logger.debug(f'UPLOAD JSON-File')
+                        json_resp = self._upload_json(json.dumps(self.json_data))
+                        if json_resp.status_code != 201:
+                            json_resp_text = json.loads(json_resp.text)
+                            self.logger.error(f'{json_resp.status_code} - {json_resp_text["title"]} - {json_resp_text["detail"]}')
+                        else:
+                            self.logger.info(f'UPLOAD for "{filename}" successfully')
                     else:
-                        self.logger.info(f'UPLOAD for "{filename}" successfully')
-                else:
-                    self.logger.error(f'Video Response: {video_resp}; Picture Response: {picture_resp}. JSON-Data will not uploaded.')
+                        self.logger.error(f'Video Response: {video_resp}; Picture Response: {picture_resp}. JSON-Data will not uploaded.')
+                except:
+                    save_error(self.logger)
                 
             time.sleep(10)
 
@@ -348,10 +351,7 @@ class FileTransmitter:
                     return filename
                 i = i + 1
             except:
-                tb = sys.exc_info()[2]
-                error = traceback.extract_tb(tb)
-                self.logger.error(str(error.format()))
-                raise
+                save_error(self.logger)
 
     def _generate_json(self, filename):
         now = str(DateTime.now()).split(' ')
@@ -390,22 +390,24 @@ class FileTransmitter:
 
 
 def setup_GPIO(main_logger):
+    try:
+        GPIO.setmode(GPIO.BCM)
 
-    GPIO.setmode(GPIO.BCM)
+        # infrared motion detector
+        GPIO.setup(24, GPIO.IN)
 
-    # infrared motion detector
-    GPIO.setup(24, GPIO.IN)
+        # Relais for 950nm LEDs
+        GPIO.setup(25, GPIO.OUT)
 
-    # Relais for 950nm LEDs
-    GPIO.setup(25, GPIO.OUT)
+        # Relais for 850nm LEDs
+        GPIO.setup(12, GPIO.OUT)
 
-    # Relais for 850nm LEDs
-    GPIO.setup(12, GPIO.OUT)
-
-    # Relais for Solar Panel
-    GPIO.setup(16, GPIO.OUT)
-        
-    main_logger.info("CONFIGURE all GPIO IN and OUTs sucessfully")
+        # Relais for Solar Panel
+        GPIO.setup(16, GPIO.OUT)
+            
+        main_logger.info("CONFIGURE all GPIO IN and OUTs sucessfully")
+    except:
+        save_error(main_logger)
 
 
 def is_brightness_low(data, threshold):
@@ -477,44 +479,41 @@ def main():
 
     setup_GPIO(main_logger)
 
-    try:
-        data = Data(data_logger, sensors_logger)
-        data.start()
-        motion_detector = MovementDetector(motion_logger)
-        motion_detector.start()
-        transmitter = FileTransmitter(transmit_logger)
-        transmitter.start()
+    data = Data(data_logger, sensors_logger)
+    data.start()
+    motion_detector = MovementDetector(motion_logger)
+    motion_detector.start()
+    transmitter = FileTransmitter(transmit_logger)
+    transmitter.start()
 
-        recording = False
-        while True:
-            try:
-                if motion_detector.detected and not recording:
-                    low_brightness = is_brightness_low(data, 5)
-                    main_logger.debug(f'brightness: {low_brightness}')
-                    if low_brightness:
-                        main_logger.info('ON LED Panel')
-                        GPIO.output(25, True)
-                        GPIO.output(12, True)
-                    video = Video(video_logger)
-                    video.record()
-                    del video
-                    recording = False
-                    if low_brightness:
-                        main_logger.info('OFF LED Panel')
-                        GPIO.output(25, False)
-                        GPIO.output(12, False)
-                    motion_detector.detected = False
-                time.sleep(0.5)
-            except KeyboardInterrupt:
-                raise
-            except:
-                tb = sys.exc_info()[2]
-                error = traceback.extract_tb(tb)
-                main_logger.error(str(error))
-                raise
-    finally:
-        GPIO.cleanup()
-        main_logger.info("CLEAN all GPIO Pins")
+    recording = False
+    while True:
+        try:
+            if motion_detector.detected and not recording:
+                low_brightness = is_brightness_low(data, 5)
+                main_logger.info(f'brightness: {low_brightness}')
+                if low_brightness:
+                    main_logger.info('ON LED Panel')
+                    GPIO.output(25, True)
+                    GPIO.output(12, True)
+                video = Video(video_logger)
+                video.record()
+                del video
+                recording = False
+                if low_brightness:
+                    main_logger.info('OFF LED Panel')
+                    GPIO.output(25, False)
+                    GPIO.output(12, False)
+                motion_detector.detected = False
+            time.sleep(0.5)
+        except KeyboardInterrupt:
+            raise
+        except:
+            save_error(main_logger)
+        finally:
+            GPIO.cleanup()
+            main_logger.info("CLEAN all GPIO Pins")
+            main_logger.info('TERMINATE "wildcam.py"')
 
     
 if __name__ == '__main__':
