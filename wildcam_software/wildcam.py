@@ -417,6 +417,16 @@ def is_brightness_low(data, threshold):
         return False
 
 
+def save_error(logger):
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    traceback_list = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    traceback_string = '\n'
+    for line in traceback_list:
+        traceback_string += line
+    logger.error(traceback_string) 
+    raise
+
+
 def main():
     # Configure Loggers
     console_handler = logging.StreamHandler()
