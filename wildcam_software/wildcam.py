@@ -1,6 +1,4 @@
 from datetime import datetime as DateTime
-import datetime
-from random import randint
 from secrets import token_urlsafe
 import os
 from os import getcwd, listdir
@@ -10,7 +8,6 @@ import shutil
 import requests
 import json
 import logging
-import asyncio
 import sys
 import time
 import subprocess
@@ -20,7 +17,6 @@ import traceback
 from moviepy.editor import VideoFileClip
 from PIL import Image
 from python_tsl2591 import tsl2591
-import board
 import smbus2
 import bme280
 
