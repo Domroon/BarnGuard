@@ -510,6 +510,7 @@ def main():
             GPIO.cleanup()
             main_logger.info("CLEAN all GPIO Pins")
             main_logger.info('TERMINATE "wildcam.py"')
+            sys.exit()
 
     
 if __name__ == '__main__':
