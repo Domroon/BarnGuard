@@ -280,12 +280,12 @@ class Data:
         with open('sensors_data.json', 'r') as file:
             json_data = json.loads(file.read())
 
-        if len(json_data) >= 1:
-            # get the last object
-            object_num = len(json_data) - 1
-            return json_data[object_num]
-        else:
-            self.logger.error('Can not read last data. File is empty.')
+            if len(json_data) >= 1:
+                # get the last object
+                object_num = len(json_data) - 1
+                return json_data[object_num]
+            else:
+                self.logger.error('Can not read last data. File is empty.')
 
         
 class FileTransmitter:
