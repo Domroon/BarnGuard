@@ -483,8 +483,9 @@ def main():
     transmitter.start()
 
     recording = False
-    while True:
-        try:
+    
+    try:
+        while True:
             if motion_detector.detected and not recording:
                 low_brightness = is_brightness_low(data, 5)
                 main_logger.info(f'brightness: {low_brightness}')
@@ -502,16 +503,16 @@ def main():
                     GPIO.output(12, False)
                 motion_detector.detected = False
             time.sleep(0.5)
-        except KeyboardInterrupt:
-            raise
-        except:
-            save_error(main_logger)
-        finally:
-            GPIO.cleanup()
-            main_logger.info("CLEAN all GPIO Pins")
-            main_logger.info('TERMINATE "wildcam.py"')
-            sys.exit()
-
-    
+    except KeyboardInterrupt:
+        raise
+    except:
+        save_error(main_logger)
+    finally:
+        GPIO.cleanup()
+        main_logger.info("CLEAN all GPIO Pins")
+        main_logger.info('TERMINATE "wildcam.py"')
+        sys.exit()
+  
+   
 if __name__ == '__main__':
     main()
