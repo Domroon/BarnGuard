@@ -159,13 +159,16 @@ class SensorData:
         self.logger = logger
         self.tslDevice = tsl2591()
         #self.dhtDevice = adafruit_dht.DHT22(board.D23, use_pulseio=False)
-        self.bme280Device = bme280.load_calibration_params(smbus2.SMBus(1), 0x76)
+        self._bus = smbus2.SMBus(1)
+        self._address = 0x76
         self.solarDevice = INA219(SHUNT_OHMS, address=0x40)
         self.solarDevice.configure()
         self.powerbankDevice = INA219(SHUNT_OHMS, address=0x41)
         self.powerbankDevice.configure()
         self.extBatDevice = INA219(SHUNT_OHMS, address=0x44)
         self.extBatDevice.configure()
+
+        bme280.load_calibration_params(self._bus, self._address)
 
     def read_brightness(self):
         # unit: lux
@@ -189,12 +192,12 @@ class SensorData:
 
     def read_temperature(self):
         # unit: °C
-        bme280_data = bme280.sample(smbus2.SMBus(1), 0x76, self.bme280Device)
+        bme280_data = bme280.sample(self._bus, self._address)
         return bme280_data.temperature
 
     def read_pressure(self):
         # unit: hPa
-        bme280_data = bme280.sample(smbus2.SMBus(1), 0x76, self.bme280Device)
+        bme280_data = bme280.sample(self._bus, self._address)
         return bme280_data.pressure
 
     def read_solar_voltage(self):
