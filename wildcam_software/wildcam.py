@@ -506,6 +506,14 @@ def main():
                     GPIO.output(12, False)
                 motion_detector.detected = False
             time.sleep(0.5)
+    except json.decoder.JSONDecodeError:
+        main_logger.error("json.decoder.JSONDecodeError - REBOOT in 20s")
+        main_logger.warning("REBOOTing is not a perfect solution, but in future update there will be a sqlLite Database instead a very long json-file")
+        time.sleep(20)
+        GPIO.cleanup()
+        main_logger.info("CLEAN all GPIO Pins")
+        main_logger.info("REBOOT the Camera")
+        subprocess.run(["sudo", "reboot", "now"])
     except KeyboardInterrupt:
         raise
     except:
