@@ -23,7 +23,7 @@ TARGETS = {
     "video-move": BASE_PATH / "video-data",
 }
 
-ALLOWED_EXTENSIONS = {'mp4'}
+ALLOWED_EXTENSIONS = {'mp4', 'jpg'}
 
 JWT_ISSUER = 'com.zalando.connexion'
 JWT_SECRET = 'change_this'
@@ -112,7 +112,7 @@ def home():
 
 @connex_app.route('/videos/<path:filename>', methods=['GET', 'POST'])
 def single_video(filename):
-    videos = os.path.join(os.getcwd(), flask_app.config['VIDEO_FOLDER_PROCESSED'])
+    videos = os.path.join(os.getcwd(), flask_app.config['MEDIA_FOLDER'])
     logger.debug("get single video")
     return send_from_directory(directory=videos, filename=filename)
 
@@ -120,7 +120,7 @@ def single_video(filename):
 @connex_app.route('/thumbnail/<path:filename>', methods=['GET', 'POST'])
 def single_thumbnail(filename):
     logger.debug('get thumbnail')
-    thumbnails = os.path.join(os.getcwd(), flask_app.config['THUMBNAIL_FOLDER'])
+    thumbnails = os.path.join(os.getcwd(), flask_app.config['MEDIA_FOLDER'])
     return send_from_directory(directory=thumbnails, filename=filename)
 
 
@@ -128,16 +128,16 @@ def single_thumbnail(filename):
 def upload_file():
     if request.method == 'POST':
         if 'file' not in request.files:
-            logger.warning('no video-file in post-request "/upload"')
+            logger.warning('no video-file or jpeg-file in post-request "/upload"')
             return "400"
     file = request.files['file']
     if file and allowed_file(file.filename):
         filename = file.filename
-        file.save(os.path.join(flask_app.config['VIDEO_FOLDER'], filename))
-        manage_thumbnails()
+        file.save(os.path.join(flask_app.config['MEDIA_FOLDER'], filename))
+        # manage_thumbnails()
         return "200"
     else:
-        logger.warning('videotype in post-request "/upload" is not correct')
+        logger.warning('videotype or picturetype in post-request "/upload" is not correct')
         return "415"
 
 
